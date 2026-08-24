@@ -326,58 +326,6 @@ export function shadeColor(
     );
 }
 
-// Boost color saturation for more vibrant SNES-style palette
-export function boostSaturation(hex: string, amount: number = 0.2): string {
-    const clean = hex.replace("#", "");
-    const full = clean.length === 3 
-        ? clean.split("").map(c => c + c).join("") 
-        : clean;
-    
-    const num = parseInt(full, 16);
-    const channels = [
-        (num >> 16) & 255,
-        (num >> 8) & 255,
-        num & 255
-    ];
-    
-    const r = channels[0] / 255;
-    const g = channels[1] / 255;
-    const b = channels[2] / 255;
-    
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const l = (max + min) / 2;
-    
-    let h = 0, s = 0;
-    if (max !== min) {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-        else if (max === g) h = ((b - r) / d + 2) / 6;
-        else h = ((r - g) / d + 4) / 6;
-    }
-    
-    s = Math.min(1, s * (1 + amount));
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs((h * 6) % 2 - 1));
-    const m = l - c / 2;
-    
-    let rPrime = 0, gPrime = 0, bPrime = 0;
-    const hSix = h * 6;
-    if (hSix < 1) { rPrime = c; gPrime = x; }
-    else if (hSix < 2) { rPrime = x; gPrime = c; }
-    else if (hSix < 3) { gPrime = c; bPrime = x; }
-    else if (hSix < 4) { bPrime = c; rPrime = x; }
-    else if (hSix < 5) { rPrime = c; bPrime = x; }
-    else { rPrime = x; bPrime = c; }
-    
-    return "#" + [
-        Math.round((rPrime + m) * 255),
-        Math.round((gPrime + m) * 255),
-        Math.round((bPrime + m) * 255)
-    ].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0")).join("");
-}
-
 function pick<T>(items: readonly T[]): T {
     return items[
         Math.floor(Math.random() * items.length)
