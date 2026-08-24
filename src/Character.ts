@@ -5,7 +5,12 @@ import type { TraitId } from "./Personality";
 export type CharacterState =
     | "idle"
     | "walking"
-    | "talking";
+    | "talking"
+    | "boarding"
+    | "in_vehicle"
+    | "disembarking";
+
+export type RenderLayer = "background" | "mainground" | "foreground";
 
 export type MoodType = "happy" | "sad" | "angry" | "stressed" | "content" | "scared";
 
@@ -40,4 +45,8 @@ export type Character = {
     mood: MoodType;
     energy: number;
     lastEventTime: number;
+
+    renderLayer?: RenderLayer;
+    onVehicleId?: string;
+    isSubroute?: boolean;
 }

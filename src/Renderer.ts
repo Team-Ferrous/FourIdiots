@@ -3,6 +3,15 @@ import type { LocationId } from "./Location";
 import { SPRITE, drawCitizen } from "./CharacterSprite";
 import { getLocation } from "./Location";
 
+export type RenderLayer = "background" | "mainground" | "foreground";
+
+function getCharacterLayer(character: Character): RenderLayer {
+  if (character.renderLayer) return character.renderLayer;
+  if (character.y > 320) return "background";
+  if (character.y < 150) return "foreground";
+  return "mainground";
+}
+
 export function renderWorld(
     ctx: CanvasRenderingContext2D,
     characters: Character[],
@@ -11,29 +20,118 @@ export function renderWorld(
 ) {
     const canvas = ctx.canvas;
 
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawRoom(ctx, currentLocation);
 
     // Filter characters in current location
     const locCharacters = characters.filter(c => c.location === currentLocation);
     
-    // Draw characters by Y position.
-    const sortedCharacters =
-        [...locCharacters].sort(
-            (a, b) => a.y - b.y
-        );
+    // Separate into layers
+    const backgroundChars = locCharacters.filter(c => getCharacterLayer(c) === "background");
+    const maingroundChars = locCharacters.filter(c => getCharacterLayer(c) === "mainground");
+    const foregroundChars = locCharacters.filter(c => getCharacterLayer(c) === "foreground");
 
-    for (const character of sortedCharacters) {
-        drawCharacter(ctx, character, elapsedTime);
-    }
+    // Render layers in order
+    renderBackgroundLayer(ctx, backgroundChars, elapsedTime);
+    renderMainGroundLayer(ctx, maingroundChars, elapsedTime);
+    renderForegroundLayer(ctx, foregroundChars, elapsedTime);
 
     drawLocationUI(ctx, currentLocation);
+}
+
+function renderBackgroundLayer(
+    ctx: CanvasRenderingContext2D,
+    characters: Character[],
+    elapsedTime: number
+) {
+    // Sort by Y position
+    const sorted = [...characters].sort((a, b) => a.y - b.y);
+
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+
+    for (const character of sorted) {
+        drawCharacter(ctx, character, elapsedTime, 0.7);
+    }
+
+    ctx.restore();
+}
+
+function renderMainGroundLayer(
+    ctx: CanvasRenderingContext2D,
+    characters: Character[],
+    elapsedTime: number
+) {
+    // Sort by Y position
+    const sorted = [...characters].sort((a, b) => a.y - b.y);
+
+    ctx.save();
+    ctx.globalAlpha = 1.0;
+
+    for (const character of sorted) {
+        drawCharacter(ctx, character, elapsedTime, 1.0);
+    }
+
+    ctx.restore();
+}
+
+function renderForegroundLayer(
+    ctx: CanvasRenderingContext2D,
+    characters: Character[],
+    elapsedTime: number
+) {
+    // Sort by Y position
+    const sorted = [...characters].sort((a, b) => a.y - b.y);
+
+    ctx.save();
+    ctx.globalAlpha = 1.0;
+
+    for (const character of sorted) {
+        drawCharacter(ctx, character, elapsedTime, 1.1);
+    }
+
+    drawSimpleTrain(ctx, elapsedTime);
+
+    ctx.restore();
+}
+
+function drawSimpleTrain(ctx: CanvasRenderingContext2D, elapsedTime: number) {
+    const trainY = 80;
+    const trainX = 50 + ((elapsedTime / 100) % 750);
+
+    ctx.fillStyle = "#8b0000";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+
+    // Train engine
+    ctx.fillRect(trainX, trainY, 60, 40);
+    ctx.strokeRect(trainX, trainY, 60, 40);
+
+    // Train window
+    ctx.fillStyle = "#87ceeb";
+    ctx.fillRect(trainX + 10, trainY + 10, 20, 15);
+    ctx.strokeRect(trainX + 10, trainY + 10, 20, 15);
+
+    // Train cars
+    for (let i = 1; i <= 3; i++) {
+        ctx.fillStyle = "#8b0000";
+        ctx.fillRect(trainX + 60 + (i * 45), trainY, 40, 40);
+        ctx.strokeRect(trainX + 60 + (i * 45), trainY, 40, 40);
+
+        // Windows
+        ctx.fillStyle = "#87ceeb";
+        ctx.fillRect(trainX + 70 + (i * 45), trainY + 8, 15, 12);
+        ctx.fillRect(trainX + 70 + (i * 45), trainY + 22, 15, 12);
+    }
+
+    // Track
+    ctx.strokeStyle = "#654321";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(0, trainY + 40);
+    ctx.lineTo(ctx.canvas.width, trainY + 40);
+    ctx.stroke();
 }
 
 function drawRoom(
@@ -43,167 +141,95 @@ function drawRoom(
     const location = getLocation(locationId);
 
     ctx.fillStyle = location.bgColor;
-
-    ctx.fillRect(
-        0,
-        0,
-        ctx.canvas.width,
-        ctx.canvas.height
-    );
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     // Back wall
     ctx.fillStyle = location.wallColor;
-
-    ctx.fillRect(
-        0,
-        0,
-        ctx.canvas.width,
-        location.floorY
-    );
+    ctx.fillRect(0, 0, ctx.canvas.width, location.floorY);
 
     // Floor line
     ctx.strokeStyle = "#514b45";
     ctx.lineWidth = 4;
-
     ctx.beginPath();
     ctx.moveTo(0, location.floorY);
     ctx.lineTo(ctx.canvas.width, location.floorY);
     ctx.stroke();
 
     // Draw location-specific elements
-    switch (locationId) {
-        case "park":
-            drawParkElements(ctx);
-            break;
-        case "office":
-            drawOfficeElements(ctx);
-            break;
-        case "bar":
-            drawBarElements(ctx);
-            break;
-        case "gym":
-            drawGymElements(ctx);
-            break;
-        case "home":
-            drawHomeElements(ctx);
-            break;
-    }
-}
-
-function drawParkElements(ctx: CanvasRenderingContext2D) {
-    // Simple tree representation
-    ctx.fillStyle = "#4a7c3a";
-    ctx.fillRect(150, 80, 40, 60);
-    ctx.fillRect(500, 100, 50, 50);
-}
-
-function drawOfficeElements(ctx: CanvasRenderingContext2D) {
-    // Desks
-    ctx.fillStyle = "#5c4a3a";
-    ctx.fillRect(80, 140, 60, 20);
-    ctx.fillRect(300, 140, 60, 20);
-    ctx.fillRect(520, 140, 60, 20);
-}
-
-function drawBarElements(ctx: CanvasRenderingContext2D) {
-    // Bar counter
-    ctx.fillStyle = "#6b4423";
-    ctx.fillRect(200, 100, 400, 40);
-    
-    ctx.fillStyle = "#8b5a2b";
-    ctx.fillRect(200, 95, 400, 5);
-}
-
-function drawGymElements(ctx: CanvasRenderingContext2D) {
-    // Equipment
-    ctx.fillStyle = "#5a5a5a";
-    ctx.fillRect(120, 120, 30, 50);
-    ctx.fillRect(400, 120, 30, 50);
-    ctx.fillRect(680, 120, 30, 50);
-}
-
-function drawHomeElements(ctx: CanvasRenderingContext2D) {
-    // Couch
-    ctx.fillStyle = "#7a5a3a";
-    ctx.fillRect(200, 100, 150, 50);
-}
-
-function drawLocationUI(
-    ctx: CanvasRenderingContext2D,
-    locationId: LocationId
-) {
-    const location = getLocation(locationId);
-
-    // Location name
-    ctx.font = "bold 16px monospace";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#111";
-
-    ctx.fillText(
-        location.name,
-        10,
-        25
-    );
-
-    // Draw exit points
-    ctx.font = "10px monospace";
-    ctx.textAlign = "center";
-
-    for (const exit of location.exits) {
-        ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-        ctx.fillRect(exit.x - 15, exit.y - 15, 30, 30);
-        
-        ctx.fillStyle = "#444";
-        ctx.fillText(
-            exit.label,
-            exit.x,
-            exit.y + 25
-        );
+    if (location.visualElements) {
+        for (const elem of location.visualElements) {
+            ctx.fillStyle = elem.color || "#8b7355";
+            switch (elem.type) {
+                case "tree":
+                    ctx.fillRect(elem.x - 10, elem.y, 20, 60);
+                    break;
+                case "desk":
+                    ctx.fillRect(elem.x, elem.y, 40, 20);
+                    break;
+                case "counter":
+                    ctx.fillRect(elem.x, elem.y, 100, 30);
+                    break;
+                case "equipment":
+                    ctx.fillRect(elem.x, elem.y, 30, 40);
+                    break;
+                case "couch":
+                    ctx.fillRect(elem.x, elem.y, 60, 30);
+                    break;
+                case "bookshelf":
+                    ctx.fillRect(elem.x, elem.y, 25, 50);
+                    break;
+                case "waves":
+                    ctx.fillStyle = elem.color || "#4a90e2";
+                    for (let i = 0; i < 5; i++) {
+                        ctx.beginPath();
+                        ctx.arc(elem.x + i * 80, elem.y + 20, 30, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    break;
+            }
+        }
     }
 }
 
 function drawCharacter(
     ctx: CanvasRenderingContext2D,
     character: Character,
-    elapsedTime: number = 0
+    elapsedTime: number,
+    scale: number = 1.0
 ) {
-    // Soft shadow on the floor, which grounds the sprite.
+    // Soft shadow on the floor
     ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-
     ctx.beginPath();
     ctx.ellipse(
         character.x,
         character.y + 3,
-        17,
-        5,
+        17 * scale,
+        5 * scale,
         0,
         0,
         Math.PI * 2
     );
     ctx.fill();
 
-    const walkTime =
-        character.state === "walking" ? elapsedTime : 0;
+    const walkTime = character.state === "walking" ? elapsedTime : 0;
 
+    ctx.save();
+    ctx.scale(scale, scale);
     drawCitizen(
         ctx,
         character.appearance,
-        character.x,
-        character.y,
+        character.x / scale,
+        character.y / scale,
         1,
         walkTime
     );
+    ctx.restore();
 
     // Name
     ctx.font = "12px monospace";
     ctx.textAlign = "center";
     ctx.fillStyle = "#111";
-
-    ctx.fillText(
-        character.name,
-        character.x,
-        character.y + 18
-    );
+    ctx.fillText(character.name, character.x, character.y + 18);
 
     if (character.speech) {
         drawSpeechBubble(
@@ -223,34 +249,41 @@ function drawSpeechBubble(
 ) {
     ctx.font = "12px monospace";
 
-    const width =
-        ctx.measureText(text).width + 16;
+    const width = ctx.measureText(text).width + 16;
 
     ctx.fillStyle = "white";
-
-    ctx.fillRect(
-        x - width / 2,
-        y - 22,
-        width,
-        25
-    );
+    ctx.fillRect(x - width / 2, y - 22, width, 25);
 
     ctx.strokeStyle = "#111";
     ctx.lineWidth = 2;
-
-    ctx.strokeRect(
-        x - width / 2,
-        y - 22,
-        width,
-        25
-    );
+    ctx.strokeRect(x - width / 2, y - 22, width, 25);
 
     ctx.fillStyle = "#111";
     ctx.textAlign = "center";
+    ctx.fillText(text, x, y - 6);
+}
 
-    ctx.fillText(
-        text,
-        x,
-        y - 6
-    );
+function drawLocationUI(
+    ctx: CanvasRenderingContext2D,
+    locationId: LocationId
+) {
+    const location = getLocation(locationId);
+
+    // Location name
+    ctx.font = "bold 16px monospace";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#111";
+    ctx.fillText(location.name, 10, 25);
+
+    // Draw exit points
+    ctx.font = "10px monospace";
+    ctx.textAlign = "center";
+
+    for (const exit of location.exits) {
+        ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+        ctx.fillRect(exit.x - 15, exit.y - 15, 30, 30);
+        
+        ctx.fillStyle = "#444";
+        ctx.fillText(exit.label, exit.x, exit.y + 25);
+    }
 }
