@@ -7,7 +7,7 @@
  */
 
 import type { Appearance } from "./Appearance";
-import { coversLegs, shadeColor } from "./Appearance";
+import { coversLegs, shadeColor, boostSaturation } from "./Appearance";
 
 /** Every part is outlined in this, which defines the retro look. */
 const INK = "#12101a";
@@ -66,14 +66,26 @@ export function drawCitizen(
     ctx.save();
 
     ctx.translate(x, y);
+    // Boost saturation for SNES-style vibrant colors
+    const boostedApp = {
+        ...appearance,
+        skin: boostSaturation(appearance.skin, 0.15),
+        hairColor: boostSaturation(appearance.hairColor, 0.2),
+        shirtColor: boostSaturation(appearance.shirtColor, 0.2),
+        accentColor: boostSaturation(appearance.accentColor, 0.2),
+        trouserColor: boostSaturation(appearance.trouserColor, 0.15),
+        shoeColor: boostSaturation(appearance.shoeColor, 0.1),
+        hatColor: boostSaturation(appearance.hatColor, 0.2),
+        eyeColor: boostSaturation(appearance.eyeColor, 0.15)
+    };
     ctx.scale(scale, scale);
 
     // Crisp edges: the sprite is authored on whole pixels.
     ctx.imageSmoothingEnabled = false;
 
-    drawLegs(ctx, appearance, elapsedTime);
+    drawLegs(ctx, boostedApp, elapsedTime);
     drawTorso(ctx, appearance);
-    drawArms(ctx, appearance, elapsedTime);
+    drawArms(ctx, boostedApp, elapsedTime);
     drawHead(ctx, appearance);
     drawHair(ctx, appearance);
     drawFace(ctx, appearance);
@@ -148,7 +160,7 @@ function drawLegs(
     // Legs shuffle apart and back together out of phase, like a
     // stepping gait. Zero when idle, since elapsedTime is 0 then.
     const stride =
-        Math.round(Math.sin(elapsedTime / 150) * 3);
+        Math.round(Math.sin(elapsedTime / 140) * 5); // Enhanced stride for SNES-style
 
     const legs = [left - stride, right + stride];
 
@@ -162,6 +174,9 @@ function drawLegs(
             legWidth,
             legHeight - shoeHeight
         );
+        
+        // Add shading on the right side of leg for depth (SNES-style)
+        box(ctx, shadeColor(appearance.skin, -0.15), x + legWidth - 2, legTop + 4, 2, legHeight - shoeHeight - 6);
 
         if (coverage > 0) {
             oBox(
@@ -233,6 +248,9 @@ function drawTorso(
 
     // Bare chest first, so tank tops and overalls show skin.
     oBox(ctx, appearance.skin, left, bodyTop, bodyWidth, bodyHeight);
+    
+    // Add chest shading for depth (right side darker for SNES look)
+    box(ctx, shadeColor(appearance.skin, -0.12), left + bodyWidth - 4, bodyTop + 2, 4, bodyHeight - 4);
 
     switch (appearance.topStyle) {
         case "tank":
@@ -395,7 +413,7 @@ function drawArms(
     // Arms bob up and down out of phase with each other while
     // walking, echoing the legs' stride. Zero when idle.
     const swing =
-        Math.round(Math.sin(elapsedTime / 150) * -2);
+        Math.round(Math.sin(elapsedTime / 140) * -4); // Enhanced arm swing
 
     const arms = [left, right];
 
@@ -507,9 +525,13 @@ function drawFace(
 
     box(ctx, brow, -9, eyeY - 4, 6, 2);
     box(ctx, brow, 3, eyeY - 4, 6, 2);
+    // Add darker shading under brows for expression
+    box(ctx, shadeColor(appearance.hairColor, -0.4), -9, eyeY - 3, 6, 1);
+    box(ctx, shadeColor(appearance.hairColor, -0.4), 3, eyeY - 3, 6, 1);
 
-    // Nose: a short shaded edge rather than an outline.
-    box(ctx, shadeColor(appearance.skin, -0.28), -1, headTop + 15, 2, 3);
+    // Nose: a short shaded edge with better contrast for SNES look
+    box(ctx, shadeColor(appearance.skin, -0.35), -1, headTop + 15, 2, 3);
+    box(ctx, shadeColor(appearance.skin, -0.18), 0, headTop + 15, 1, 3);
 
     // Mouth with a hint of a smile at the left corner.
     box(ctx, INK, -4, headTop + 20, 8, 1);
