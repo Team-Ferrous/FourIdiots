@@ -35,7 +35,7 @@ export function renderWorld(
     // Render layers in order
     renderBackgroundLayer(ctx, backgroundChars, elapsedTime);
     renderMainGroundLayer(ctx, maingroundChars, elapsedTime);
-    renderForegroundLayer(ctx, foregroundChars, elapsedTime);
+    renderForegroundLayer(ctx, foregroundChars, currentLocation, elapsedTime);
 
     drawLocationUI(ctx, currentLocation);
 }
@@ -79,6 +79,7 @@ function renderMainGroundLayer(
 function renderForegroundLayer(
     ctx: CanvasRenderingContext2D,
     characters: Character[],
+    currentLocation: LocationId,
     elapsedTime: number
 ) {
     // Sort by Y position
@@ -91,14 +92,17 @@ function renderForegroundLayer(
         drawCharacter(ctx, character, elapsedTime, 1.1);
     }
 
-    drawSimpleTrain(ctx, elapsedTime);
+    // Only draw train at train station
+    if (currentLocation === "train") {
+        drawTrain(ctx);
+    }
 
     ctx.restore();
 }
 
-function drawSimpleTrain(ctx: CanvasRenderingContext2D, elapsedTime: number) {
-    const trainY = 80;
-    const trainX = 50 + ((elapsedTime / 100) % 750);
+function drawTrain(ctx: CanvasRenderingContext2D) {
+    const trainY = 100;
+    const trainX = 150;
 
     ctx.fillStyle = "#8b0000";
     ctx.strokeStyle = "#000000";
@@ -130,8 +134,17 @@ function drawSimpleTrain(ctx: CanvasRenderingContext2D, elapsedTime: number) {
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(0, trainY + 40);
-    ctx.lineTo(ctx.canvas.width, trainY + 40);
+    ctx.lineTo(800, trainY + 40);
     ctx.stroke();
+
+    // Platform
+    ctx.fillStyle = "#8b7355";
+    ctx.fillRect(50, trainY + 40, 700, 30);
+    
+    // Platform edge
+    ctx.strokeStyle = "#654321";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(50, trainY + 40, 700, 30);
 }
 
 function drawRoom(
