@@ -1,6 +1,8 @@
 import type { Character } from "./Character";
 import type { Appearance } from "./Appearance";
+import type { LocationId } from "./Location";
 import { DEFAULT_APPEARANCE } from "./Appearance";
+import { getLocation } from "./Location";
 
 const WALK_SPEED = 35;
 const TALK_DISTANCE = 55;
@@ -13,6 +15,7 @@ export const characters: Character[] = [
         "Fishing",
         150,
         250,
+        "office",
         {
             skin: "#e4b78e",
             hairStyle: "short",
@@ -37,6 +40,7 @@ export const characters: Character[] = [
         "Painting",
         300,
         300,
+        "park",
         {
             skin: "#f1c9a5",
             hairStyle: "long",
@@ -61,6 +65,7 @@ export const characters: Character[] = [
         "Video Games",
         500,
         250,
+        "gym",
         {
             skin: "#8a5a34",
             hairStyle: "messy",
@@ -85,6 +90,7 @@ export const characters: Character[] = [
         "Gardening",
         650,
         300,
+        "bar",
         {
             skin: "#573520",
             hairStyle: "afro",
@@ -103,16 +109,6 @@ export const characters: Character[] = [
     )
 ];
 
-const destinations = [
-    { x: 100, y: 220 },
-    { x: 180, y: 330 },
-    { x: 300, y: 260 },
-    { x: 400, y: 340 },
-    { x: 500, y: 220 },
-    { x: 620, y: 330 },
-    { x: 700, y: 250 }
-];
-
 function makeCharacter(
     id: string,
     name: string,
@@ -120,6 +116,7 @@ function makeCharacter(
     hobby: string,
     x: number,
     y: number,
+    location: LocationId,
     appearance: Appearance = DEFAULT_APPEARANCE
 ): Character {
 
@@ -134,6 +131,8 @@ function makeCharacter(
         likes: [],
         dislikes: [],
 
+        location,
+
         x,
         y,
 
@@ -144,19 +143,16 @@ function makeCharacter(
     };
 }
 
-/**
- * Add a player-created citizen to the world.
- *
- * They spawn at a random destination so they do not appear on top of
- * anyone, and get a unique id even if the name is reused.
- */
 export function addCitizen(
     appearance: Appearance,
     name: string
 ): Character {
+    const locationId: LocationId = "park";
+    const location = getLocation(locationId);
+    
     const spawn =
-        destinations[
-            Math.floor(Math.random() * destinations.length)
+        location.destinations[
+            Math.floor(Math.random() * location.destinations.length)
         ];
 
     const character = makeCharacter(
@@ -166,6 +162,7 @@ export function addCitizen(
         "Existing",
         spawn.x,
         spawn.y,
+        locationId,
         appearance
     );
 
@@ -221,6 +218,26 @@ function updateCharacter(
 
         character.state = "idle";
 
+        // Check if at an exit point
+        const location = getLocation(character.location);
+        const atExit = location.exits.find(
+            exit => Math.abs(exit.x - character.x) < 20 && Math.abs(exit.y - character.y) < 20
+        );
+
+        if (atExit && Math.random() < 0.03) {
+            // Move to new location
+            character.location = atExit.target;
+            const newLocation = getLocation(character.location);
+            const spawn = newLocation.destinations[
+                Math.floor(Math.random() * newLocation.destinations.length)
+            ];
+            character.x = spawn.x;
+            character.y = spawn.y;
+            character.targetX = spawn.x;
+            character.targetY = spawn.y;
+            return;
+        }
+
         // Small chance every frame to wander somewhere else.
         if (Math.random() < 0.01) {
             chooseNewDestination(character);
@@ -231,9 +248,6 @@ function updateCharacter(
 
     character.state = "walking";
 
-    // Never step further than the remaining distance,
-    // otherwise a large deltaTime overshoots the target
-    // and the character oscillates around it forever.
     const step =
         Math.min(
             WALK_SPEED * deltaTime,
@@ -250,11 +264,13 @@ function updateCharacter(
 function chooseNewDestination(
     character: Character
 ) {
+    const location = getLocation(character.location);
+    
     const destination =
-        destinations[
+        location.destinations[
             Math.floor(
                 Math.random() *
-                destinations.length
+                location.destinations.length
             )
         ];
 
@@ -277,6 +293,11 @@ function checkForConversations(
         ) {
             const charA = characters[a];
             const charB = characters[b];
+
+            // Only talk if in same location
+            if (charA.location !== charB.location) {
+                continue;
+            }
 
             if (
                 charA.state === "talking" ||

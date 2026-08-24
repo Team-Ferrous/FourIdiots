@@ -1,4 +1,5 @@
 import type { Appearance } from "./Appearance";
+import type { LocationId } from "./Location";
 
 export type CharacterState =
     | "idle"
@@ -16,6 +17,8 @@ export type Character = {
 
     likes: string[];
     dislikes: string[];
+
+    location: LocationId;
 
     x: number;
     y: number;

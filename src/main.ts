@@ -14,8 +14,13 @@ import {
     mountCharacterCreator
 } from "./CharacterCreator";
 
+import type { LocationId } from "./Location";
+import { getAllLocations } from "./Location";
+
 const app =
     document.querySelector<HTMLDivElement>("#app")!;
+
+let currentLocation: LocationId = "park";
 
 app.innerHTML = `
     <div id="sitcom">
@@ -23,6 +28,7 @@ app.innerHTML = `
             <button id="open-creator" type="button">
                 Create a Citizen
             </button>
+            <div id="location-selector"></div>
         </div>
 
         <canvas
@@ -64,6 +70,26 @@ document
         }
     });
 
+// Location selector
+const locationSelector = 
+    document.querySelector<HTMLDivElement>("#location-selector")!;
+
+for (const location of getAllLocations()) {
+    const btn = document.createElement("button");
+    btn.textContent = location.name;
+    btn.className = location.id === "park" ? "active" : "";
+    
+    btn.addEventListener("click", () => {
+        currentLocation = location.id;
+        document.querySelectorAll("#location-selector button").forEach(b => {
+            b.classList.remove("active");
+        });
+        btn.classList.add("active");
+    });
+    
+    locationSelector.appendChild(btn);
+}
+
 const canvas =
     document.querySelector<HTMLCanvasElement>(
         "#world"
@@ -96,6 +122,7 @@ function gameLoop(
     renderWorld(
         ctx,
         characters,
+        currentLocation,
         currentTime
     );
 
