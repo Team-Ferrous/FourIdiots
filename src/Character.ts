@@ -1,10 +1,13 @@
 import type { Appearance } from "./Appearance";
 import type { LocationId } from "./Location";
+import type { TraitId } from "./Personality";
 
 export type CharacterState =
     | "idle"
     | "walking"
     | "talking";
+
+export type MoodType = "happy" | "sad" | "angry" | "stressed" | "content" | "scared";
 
 export type Character = {
     id: string;
@@ -32,4 +35,9 @@ export type Character = {
 
     speech?: string;
     speechUntil?: number;
+
+    traits: Record<TraitId, number>;
+    mood: MoodType;
+    energy: number;
+    lastEventTime: number;
 }

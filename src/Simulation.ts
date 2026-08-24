@@ -1,11 +1,31 @@
 import type { Character } from "./Character";
 import type { Appearance } from "./Appearance";
 import type { LocationId } from "./Location";
+import type { TraitId } from "./Personality";
 import { DEFAULT_APPEARANCE } from "./Appearance";
 import { getLocation } from "./Location";
+import { initializeTraits, getTrait as getTraitDef } from "./Personality";
+import { checkScenarios, executeScenario } from "./Scenarios";
+import type { WorldState } from "./Scenarios";
 
 const WALK_SPEED = 35;
 const TALK_DISTANCE = 55;
+
+export let worldState: WorldState = {
+  weather: "sunny",
+  timeOfDay: "afternoon",
+  eventType: "none",
+  temperature: 70
+};
+
+function getTimeOfDay(timestamp: number): "morning" | "afternoon" | "evening" | "night" {
+  const seconds = timestamp / 1000;
+  const hour = Math.floor((seconds / 3600) % 24);
+  if (hour < 6) return "night";
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "evening";
+}
 
 export const characters: Character[] = [
     makeCharacter(
@@ -16,6 +36,10 @@ export const characters: Character[] = [
         150,
         250,
         "office",
+        {
+            ambitious: 75, perfectionist: 70, focused: 65, serious: 60, professional: 80,
+            emotional: 25, sociable: 40, energetic: 55, clumsy: 15, loyal: 70
+        },
         {
             skin: "#e4b78e",
             hairStyle: "short",
@@ -42,6 +66,10 @@ export const characters: Character[] = [
         300,
         "park",
         {
+            empathetic: 80, charming: 70, optimistic: 75, focused: 65, sociable: 75,
+            outgoing: 60, cheerful: 70, cultured: 70, adventurous: 60, protective: 65
+        },
+        {
             skin: "#f1c9a5",
             hairStyle: "long",
             hairColor: "#c2571f",
@@ -66,6 +94,10 @@ export const characters: Character[] = [
         500,
         250,
         "gym",
+        {
+            competitive: 75, energetic: 80, reckless: 60, lazy: 35, cooperative: 50,
+            joker: 70, confident: 70, ambitious: 55, clumsy: 45, charming: 60
+        },
         {
             skin: "#8a5a34",
             hairStyle: "messy",
@@ -92,6 +124,10 @@ export const characters: Character[] = [
         300,
         "bar",
         {
+            sociable: 85, charming: 75, empathetic: 70, outgoing: 80, cheerful: 75,
+            loyal: 80, protective: 70, honest: 70, ambitious: 50, energetic: 70
+        },
+        {
             skin: "#573520",
             hairStyle: "afro",
             hairColor: "#3a2418",
@@ -117,8 +153,14 @@ function makeCharacter(
     x: number,
     y: number,
     location: LocationId,
+    traitOverrides: Partial<Record<string, number>>,
     appearance: Appearance = DEFAULT_APPEARANCE
 ): Character {
+    const traits = initializeTraits();
+    
+    for (const [key, value] of Object.entries(traitOverrides)) {
+        (traits as any)[key] = value;
+    }
 
     return {
         id,
@@ -139,7 +181,12 @@ function makeCharacter(
         targetX: x,
         targetY: y,
 
-        state: "idle"
+        state: "idle",
+
+        traits,
+        mood: "content",
+        energy: 80,
+        lastEventTime: 0
     };
 }
 
@@ -163,6 +210,7 @@ export function addCitizen(
         spawn.x,
         spawn.y,
         locationId,
+        {},
         appearance
     );
 
@@ -173,29 +221,70 @@ export function addCitizen(
 
 export function updateSimulation(
     deltaTime: number,
-    currentTime: number
+    timestamp: number
 ) {
+    worldState.timeOfDay = getTimeOfDay(timestamp);
+    
     for (const character of characters) {
-        updateCharacter(
-            character,
-            deltaTime,
-            currentTime
-        );
+        updateCharacter(character, deltaTime, timestamp);
+        updateTraits(character, deltaTime);
+        checkAndExecuteScenarios(character);
     }
 
-    checkForConversations(currentTime);
+    checkForConversations(timestamp);
+}
+
+function updateTraits(character: Character, deltaTime: number) {
+    const traitEntries = Object.entries(character.traits) as Array<[TraitId, number]>;
+    
+    for (const [traitId, value] of traitEntries) {
+        const trait = getTraitDef(traitId);
+        if (!trait) continue;
+
+        const volatility = trait.volatility;
+        const driftAmount = (Math.random() - 0.5) * volatility * 2;
+        
+        let newValue = value + driftAmount * deltaTime * 10;
+        newValue = Math.max(0, Math.min(100, newValue));
+        
+        if (trait.conflictsWith) {
+            for (const conflictId of trait.conflictsWith) {
+                const conflictValue = character.traits[conflictId];
+                if (conflictValue && newValue > 70 && conflictValue > 70) {
+                    newValue = Math.min(newValue, 70);
+                }
+            }
+        }
+
+        character.traits[traitId] = newValue;
+    }
+
+    character.energy = Math.max(0, Math.min(100, character.energy - deltaTime * 2));
+    
+    if (character.mood === "happy") {
+        character.energy = Math.min(100, character.energy + deltaTime * 1.5);
+    } else if (character.mood === "stressed" || character.mood === "angry") {
+        character.energy = Math.max(0, character.energy - deltaTime * 3);
+    }
+}
+
+function checkAndExecuteScenarios(character: Character) {
+    const scenario = checkScenarios(character, worldState, characters);
+    if (scenario) {
+        executeScenario(scenario, character, worldState, characters);
+    }
 }
 
 function updateCharacter(
     character: Character,
     deltaTime: number,
-    currentTime: number
+    timestamp: number
 ) {
     if (character.state === "talking") {
 
         if (
             character.speechUntil &&
-            currentTime > character.speechUntil
+            timestamp > character.speechUntil
         ) {
             character.speech = undefined;
         }
@@ -218,14 +307,12 @@ function updateCharacter(
 
         character.state = "idle";
 
-        // Check if at an exit point
         const location = getLocation(character.location);
         const atExit = location.exits.find(
             exit => Math.abs(exit.x - character.x) < 20 && Math.abs(exit.y - character.y) < 20
         );
 
         if (atExit && Math.random() < 0.03) {
-            // Move to new location
             character.location = atExit.target;
             const newLocation = getLocation(character.location);
             const spawn = newLocation.destinations[
@@ -238,7 +325,6 @@ function updateCharacter(
             return;
         }
 
-        // Small chance every frame to wander somewhere else.
         if (Math.random() < 0.01) {
             chooseNewDestination(character);
         }
@@ -294,7 +380,6 @@ function checkForConversations(
             const charA = characters[a];
             const charB = characters[b];
 
-            // Only talk if in same location
             if (charA.location !== charB.location) {
                 continue;
             }
