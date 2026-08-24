@@ -18,6 +18,20 @@ export let worldState: WorldState = {
   temperature: 70
 };
 
+// Train system state
+export let trainState = {
+  isAtStation: true,
+  passengersBoarded: [] as string[],
+  departureCountdown: 0,
+  isDeparting: false,
+  departureProgress: 0
+};
+
+const TRAIN_BOARD_TARGET_X = 200;
+const TRAIN_BOARD_TARGET_Y = 100;
+const TRAIN_DEPARTURE_DELAY = 5000;
+const TRAIN_DEPARTURE_DURATION = 3000;
+
 function getTimeOfDay(timestamp: number): "morning" | "afternoon" | "evening" | "night" {
   const seconds = timestamp / 1000;
   const hour = Math.floor((seconds / 3600) % 24);
@@ -225,7 +239,53 @@ export function updateSimulation(
 ) {
     worldState.timeOfDay = getTimeOfDay(timestamp);
     
+    // Update train departing state
+    if (trainState.departureCountdown > 0) {
+        trainState.departureCountdown -= deltaTime * 1000;
+        if (trainState.departureCountdown <= 0) {
+            trainState.isDeparting = true;
+            trainState.departureProgress = 0;
+        }
+    }
+
+    if (trainState.isDeparting) {
+        trainState.departureProgress += (deltaTime * 1000) / TRAIN_DEPARTURE_DURATION;
+        if (trainState.departureProgress >= 1) {
+            trainState.isDeparting = false;
+            trainState.passengersBoarded = [];
+            trainState.departureProgress = 0;
+            for (const char of characters.filter(c => c.isOnTrain)) {
+                char.isOnTrain = false;
+                char.state = "idle";
+                char.x = 400;
+                char.y = 300;
+            }
+        }
+    }
+    
     for (const character of characters) {
+        // Boarding logic for train station
+        if (character.location === "train" && !character.isOnTrain && character.state === "idle" && character.y < 150 && Math.random() < 0.005) {
+            character.state = "boarding";
+            character.targetX = TRAIN_BOARD_TARGET_X;
+            character.targetY = TRAIN_BOARD_TARGET_Y;
+        }
+
+        // Check if character reached boarding point
+        if (character.state === "boarding") {
+            const dx = TRAIN_BOARD_TARGET_X - character.x;
+            const dy = TRAIN_BOARD_TARGET_Y - character.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 5) {
+                character.isOnTrain = true;
+                character.state = "on_train";
+                trainState.passengersBoarded.push(character.id);
+                if (trainState.passengersBoarded.length > 0 && trainState.departureCountdown === 0) {
+                    trainState.departureCountdown = TRAIN_DEPARTURE_DELAY;
+                }
+            }
+        }
+
         updateCharacter(character, deltaTime, timestamp);
         updateTraits(character, deltaTime);
         checkAndExecuteScenarios(character);

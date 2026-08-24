@@ -7,7 +7,7 @@ export type CharacterState =
     | "walking"
     | "talking"
     | "boarding"
-    | "in_vehicle"
+    | "on_train"
     | "disembarking";
 
 export type RenderLayer = "background" | "mainground" | "foreground";
@@ -47,6 +47,6 @@ export type Character = {
     lastEventTime: number;
 
     renderLayer?: RenderLayer;
-    onVehicleId?: string;
-    isSubroute?: boolean;
+    isOnTrain?: boolean;
+    boardingProgress?: number;
 }

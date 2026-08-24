@@ -2,6 +2,7 @@ import type { Character } from "./Character";
 import type { LocationId } from "./Location";
 import { SPRITE, drawCitizen } from "./CharacterSprite";
 import { getLocation } from "./Location";
+import { trainState } from "./Simulation";
 
 export type RenderLayer = "background" | "mainground" | "foreground";
 
@@ -82,8 +83,10 @@ function renderForegroundLayer(
     currentLocation: LocationId,
     elapsedTime: number
 ) {
-    // Sort by Y position
-    const sorted = [...characters].sort((a, b) => a.y - b.y);
+    // Filter out characters on train - they don't render in foreground
+    const sorted = [...characters]
+        .filter(c => !c.isOnTrain)
+        .sort((a, b) => a.y - b.y);
 
     ctx.save();
     ctx.globalAlpha = 1.0;
@@ -101,8 +104,16 @@ function renderForegroundLayer(
 }
 
 function drawTrain(ctx: CanvasRenderingContext2D) {
+    const trainBaseX = 150;
     const trainY = 100;
-    const trainX = 150;
+    
+    // Calculate train position during departure
+    let trainX = trainBaseX;
+    if (trainState.isDeparting) {
+        // Slide from 150 to -300 over departure duration
+        const departureDistance = trainBaseX + 300;
+        trainX = trainBaseX - (departureDistance * trainState.departureProgress);
+    }
 
     ctx.fillStyle = "#8b0000";
     ctx.strokeStyle = "#000000";
@@ -129,22 +140,25 @@ function drawTrain(ctx: CanvasRenderingContext2D) {
         ctx.fillRect(trainX + 70 + (i * 45), trainY + 22, 15, 12);
     }
 
-    // Track
-    ctx.strokeStyle = "#654321";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, trainY + 40);
-    ctx.lineTo(800, trainY + 40);
-    ctx.stroke();
+    // Only draw track/platform if not fully departed
+    if (trainState.departureProgress < 1) {
+        // Track
+        ctx.strokeStyle = "#654321";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, trainY + 40);
+        ctx.lineTo(800, trainY + 40);
+        ctx.stroke();
 
-    // Platform
-    ctx.fillStyle = "#8b7355";
-    ctx.fillRect(50, trainY + 40, 700, 30);
-    
-    // Platform edge
-    ctx.strokeStyle = "#654321";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(50, trainY + 40, 700, 30);
+        // Platform
+        ctx.fillStyle = "#8b7355";
+        ctx.fillRect(50, trainY + 40, 700, 30);
+        
+        // Platform edge
+        ctx.strokeStyle = "#654321";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(50, trainY + 40, 700, 30);
+    }
 }
 
 function drawRoom(
@@ -224,7 +238,7 @@ function drawCharacter(
     );
     ctx.fill();
 
-    const walkTime = character.state === "walking" ? elapsedTime : 0;
+    const walkTime = character.state === "walking" || character.state === "boarding" ? elapsedTime : 0;
 
     ctx.save();
     ctx.scale(scale, scale);
