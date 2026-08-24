@@ -59,8 +59,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 30, target: "mall", label: "Mall" }
     ],
     visualElements: [
+      { x: 100, y: 100, type: "tree", color: "#4a7c3a" },
       { x: 150, y: 80, type: "tree", color: "#4a7c3a" },
-      { x: 500, y: 100, type: "tree", color: "#4a7c3a" }
+      { x: 500, y: 100, type: "tree", color: "#4a7c3a" },
+      { x: 650, y: 90, type: "bench", color: "#8b7355" }
     ]
   },
 
@@ -90,7 +92,9 @@ const LOCATIONS: Record<LocationId, Location> = {
     visualElements: [
       { x: 150, y: 140, type: "desk", color: "#8b6f47" },
       { x: 400, y: 140, type: "desk", color: "#8b6f47" },
-      { x: 650, y: 140, type: "desk", color: "#8b6f47" }
+      { x: 650, y: 140, type: "desk", color: "#8b6f47" },
+      { x: 100, y: 100, type: "cooler", color: "#87ceeb" },
+      { x: 750, y: 120, type: "cabinet", color: "#8b6f47" }
     ]
   },
 
@@ -118,7 +122,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 420, target: "restaurant", label: "Restaurant" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "counter", color: "#6b4423" }
+      { x: 200, y: 100, type: "counter", color: "#6b4423" },
+      { x: 180, y: 130, type: "stool", color: "#8b6f47" },
+      { x: 220, y: 130, type: "stool", color: "#8b6f47" },
+      { x: 400, y: 80, type: "shelf", color: "#8b6f47" }
     ]
   },
 
@@ -147,7 +154,9 @@ const LOCATIONS: Record<LocationId, Location> = {
     visualElements: [
       { x: 120, y: 120, type: "equipment", color: "#5a5a5a" },
       { x: 400, y: 120, type: "equipment", color: "#5a5a5a" },
-      { x: 680, y: 120, type: "equipment", color: "#5a5a5a" }
+      { x: 680, y: 120, type: "equipment", color: "#5a5a5a" },
+      { x: 250, y: 110, type: "treadmill", color: "#5a5a5a" },
+      { x: 550, y: 130, type: "weights", color: "#5a5a5a" }
     ]
   },
 
@@ -174,7 +183,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 420, target: "school", label: "School" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "couch", color: "#7a5a3a" }
+      { x: 200, y: 100, type: "couch", color: "#7a5a3a" },
+      { x: 450, y: 120, type: "table", color: "#8b6f47" },
+      { x: 700, y: 100, type: "bookshelf", color: "#8b6f47" }
     ]
   },
 
@@ -203,7 +214,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 770, y: 250, target: "mall", label: "Mall" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "mailbox", color: "#8b4513" }
+      { x: 400, y: 100, type: "mailbox", color: "#c85a17" },
+      { x: 150, y: 80, type: "door", color: "#8b6f47" },
+      { x: 650, y: 100, type: "plant", color: "#4a7c3a" }
     ]
   },
 
@@ -231,7 +244,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 420, target: "gym", label: "Gym" }
     ],
     visualElements: [
-      { x: 400, y: 150, type: "waves", color: "#4a90e2" }
+      { x: 200, y: 150, type: "waves", color: "#4a90e2" },
+      { x: 400, y: 200, type: "umbrella", color: "#ff6b6b" },
+      { x: 600, y: 180, type: "sailboat", color: "#ffaa00" }
     ]
   },
 
@@ -261,7 +276,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 30, target: "policeStation", label: "Police" }
     ],
     visualElements: [
-      { x: 400, y: 100, type: "train-car", color: "#8b0000" }
+      { x: 150, y: 100, type: "train-car", color: "#8b0000" },
+      { x: 100, y: 140, type: "bench", color: "#8b7355" },
+      { x: 250, y: 140, type: "seat", color: "#8b7355" }
     ]
   },
 
@@ -287,7 +304,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 770, y: 250, target: "restaurant", label: "Restaurant" }
     ],
     visualElements: [
-      { x: 400, y: 100, type: "screen", color: "#ffffff" }
+      { x: 200, y: 80, type: "screen", color: "#2a2a2a" },
+      { x: 50, y: 100, type: "curtain", color: "#8b0000" },
+      { x: 750, y: 100, type: "curtain", color: "#8b0000" },
+      { x: 400, y: 250, type: "seat", color: "#8b7355" }
     ]
   },
 
@@ -314,8 +334,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 30, target: "restaurant", label: "Restaurant" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "lights", color: "#ff00ff" },
-      { x: 600, y: 100, type: "lights", color: "#00ffff" }
+      { x: 150, y: 80, type: "lights", color: "#ffff00" },
+      { x: 650, y: 80, type: "lights", color: "#ff00ff" },
+      { x: 400, y: 150, type: "table", color: "#8b7355" },
+      { x: 150, y: 120, type: "slot-machine", color: "#c85a17" }
     ]
   },
 
@@ -342,7 +364,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 30, target: "mall", label: "Mall" }
     ],
     visualElements: [
-      { x: 400, y: 100, type: "table", color: "#8b5a2b" }
+      { x: 200, y: 100, type: "counter", color: "#6b4423" },
+      { x: 400, y: 160, type: "table", color: "#8b6f47" },
+      { x: 600, y: 160, type: "table", color: "#8b6f47" },
+      { x: 380, y: 190, type: "chair", color: "#8b6f47" }
     ]
   },
 
@@ -374,9 +399,11 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 420, target: "school", label: "School" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "store", color: "#ff6b6b" },
-      { x: 400, y: 100, type: "store", color: "#4ecdc4" },
-      { x: 600, y: 100, type: "store", color: "#ffe66d" }
+      { x: 100, y: 80, type: "store", color: "#ff6b6b" },
+      { x: 250, y: 80, type: "store", color: "#4ecdc4" },
+      { x: 400, y: 80, type: "store", color: "#ffe66d" },
+      { x: 550, y: 80, type: "store", color: "#95e1d3" },
+      { x: 700, y: 80, type: "store", color: "#f38181" }
     ]
   },
 
@@ -402,8 +429,10 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 770, y: 250, target: "home", label: "Home" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "bookshelf", color: "#8b4513" },
-      { x: 600, y: 100, type: "bookshelf", color: "#8b4513" }
+      { x: 150, y: 100, type: "bookshelf", color: "#8b6f47" },
+      { x: 650, y: 100, type: "bookshelf", color: "#8b6f47" },
+      { x: 400, y: 140, type: "desk", color: "#8b6f47" },
+      { x: 450, y: 90, type: "lamp", color: "#ffff00" }
     ]
   },
 
@@ -433,8 +462,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 400, y: 30, target: "mall", label: "Mall" }
     ],
     visualElements: [
-      { x: 200, y: 100, type: "desk", color: "#8b6f47" },
-      { x: 600, y: 100, type: "desk", color: "#8b6f47" }
+      { x: 400, y: 50, type: "chalkboard", color: "#2a5a2a" },
+      { x: 650, y: 120, type: "podium", color: "#8b6f47" },
+      { x: 150, y: 140, type: "desk", color: "#8b6f47" }
     ]
   },
 
@@ -460,7 +490,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 770, y: 250, target: "policeStation", label: "Police" }
     ],
     visualElements: [
-      { x: 400, y: 100, type: "cross", color: "#ff0000" }
+      { x: 250, y: 100, type: "cross", color: "#ff0000" },
+      { x: 450, y: 110, type: "bed", color: "#ffffff" },
+      { x: 700, y: 100, type: "equipment", color: "#5a5a5a" }
     ]
   },
 
@@ -486,7 +518,9 @@ const LOCATIONS: Record<LocationId, Location> = {
       { x: 770, y: 250, target: "policeStation", label: "Hospital" }
     ],
     visualElements: [
-      { x: 400, y: 100, type: "badge", color: "#ffd700" }
+      { x: 300, y: 100, type: "badge", color: "#ffd700" },
+      { x: 150, y: 120, type: "desk", color: "#8b6f47" },
+      { x: 600, y: 80, type: "cell", color: "#808080" }
     ]
   }
 };

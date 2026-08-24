@@ -691,6 +691,295 @@ export const SCENARIOS: Scenario[] = [
     },
     dialogue: ["I didn't do anything!", "Please don't arrest me...", "This is scary!"],
     animationType: "stumble"
+  },
+
+  // Park scenarios
+  {
+    id: "park_romance",
+    name: "Park Romance",
+    description: "Characters fall in love on the grass",
+    condition: (char, _world, allChars) => {
+      const nearby = allChars.filter(c => 
+        c.id !== char.id && 
+        c.location === "park" && 
+        Math.hypot(c.x - char.x, c.y - char.y) < 80 &&
+        c.traits.charming > 50
+      );
+      return char.location === "park" && nearby.length > 0 && char.traits.charming > 50 && Math.random() < 0.05;
+    },
+    probability: 0.08,
+    effect: (char) => {
+      char.mood = "happy";
+      char.traits.charming = Math.min(100, char.traits.charming + 2);
+    },
+    dialogue: ["Beautiful day...", "You're nice to be around", "This is lovely"]
+  },
+
+  // Office scenarios
+  {
+    id: "office_deadline",
+    name: "Deadline Panic",
+    description: "Ambitious character rushes to finish work",
+    condition: (char, world) => 
+      char.location === "office" && 
+      char.traits.ambitious > 65 && 
+      world.timeOfDay === "evening" &&
+      Math.random() < 0.1,
+    probability: 0.12,
+    effect: (char) => {
+      char.mood = "stressed";
+      char.energy = Math.max(0, char.energy - 20);
+      char.traits.focused = Math.min(100, char.traits.focused + 5);
+    },
+    dialogue: ["Must finish!", "Almost there!", "No time left!"],
+    animationType: "work"
+  },
+
+  {
+    id: "office_coffee_break",
+    name: "Coffee Break",
+    description: "Character gets energized at the water cooler",
+    condition: (char) =>
+      char.location === "office" &&
+      char.energy < 40 &&
+      Math.random() < 0.08,
+    probability: 0.1,
+    effect: (char) => {
+      char.energy = Math.min(100, char.energy + 15);
+      char.mood = "happy";
+    },
+    dialogue: ["Ahh, caffeine!", "Much better", "Needed that"]
+  },
+
+  // Bar scenarios
+  {
+    id: "bar_friendly_drunk",
+    name: "Friendly Drunk",
+    description: "Joker gets tipsy and sociable",
+    condition: (char) =>
+      char.location === "bar" &&
+      char.traits.joker > 60 &&
+      char.traits.sociable > 60 &&
+      Math.random() < 0.07,
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "happy";
+      char.energy = Math.max(0, char.energy - 5);
+      char.traits.charming = Math.min(100, char.traits.charming + 3);
+    },
+    dialogue: ["Hahahaha!", "You're great!", "Drinks on me!"]
+  },
+
+  // Beach scenarios
+  {
+    id: "beach_sunburn",
+    name: "Sunburned",
+    description: "Clumsy person gets sunburned",
+    condition: (char) =>
+      char.location === "beach" &&
+      char.traits.clumsy > 65 &&
+      Math.random() < 0.08,
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "stressed";
+      char.energy = Math.max(0, char.energy - 15);
+    },
+    dialogue: ["Ouch!", "So red...", "That hurts!"]
+  },
+
+  {
+    id: "beach_swimming",
+    name: "Swimming Fun",
+    description: "Energetic people enjoy the water",
+    condition: (char) =>
+      char.location === "beach" &&
+      char.traits.energetic > 70 &&
+      Math.random() < 0.09,
+    probability: 0.12,
+    effect: (char) => {
+      char.mood = "happy";
+      char.energy = Math.min(100, char.energy + 10);
+    },
+    dialogue: ["Wheee!", "The water is great!", "So refreshing!"]
+  },
+
+  // Casino scenarios
+  {
+    id: "casino_big_win",
+    name: "Big Win",
+    description: "Lucky ambitious player celebrates",
+    condition: (char) =>
+      char.location === "casino" &&
+      char.traits.ambitious > 60 &&
+      Math.random() < 0.06,
+    probability: 0.08,
+    effect: (char) => {
+      char.mood = "happy";
+      char.energy = Math.min(100, char.energy + 20);
+      char.traits.confident = Math.min(100, char.traits.confident + 4);
+    },
+    dialogue: ["YES!", "I won!", "Lucky day!"]
+  },
+
+  {
+    id: "casino_lose_money",
+    name: "Lose Big",
+    description: "Devastated loss at casino",
+    condition: (char) =>
+      char.location === "casino" &&
+      char.traits.ambitious > 50 &&
+      Math.random() < 0.05,
+    probability: 0.08,
+    effect: (char) => {
+      char.mood = "sad";
+      char.energy = Math.max(0, char.energy - 25);
+      char.traits.confident = Math.max(0, char.traits.confident - 5);
+    },
+    dialogue: ["No...", "I lost it all", "This is bad"]
+  },
+
+  // Library scenarios
+  {
+    id: "library_study",
+    name: "Deep Study",
+    description: "Focused person concentrates intensely",
+    condition: (char) =>
+      char.location === "library" &&
+      char.traits.focused > 70 &&
+      Math.random() < 0.07,
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "content";
+      char.traits.focused = Math.min(100, char.traits.focused + 3);
+    },
+    dialogue: ["So absorbing", "Got it!", "Interesting"]
+  },
+
+  {
+    id: "library_talk_loud",
+    name: "Talk Too Loud",
+    description: "Clumsy social person disrupts library",
+    condition: (char) =>
+      char.location === "library" &&
+      char.traits.clumsy > 50 &&
+      char.traits.sociable > 60 &&
+      Math.random() < 0.06,
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "stressed";
+      char.traits.charming = Math.max(0, char.traits.charming - 3);
+    },
+    dialogue: ["Oops!", "Sorry", "Didn't mean to..."],
+    animationType: "stumble"
+  },
+
+  // School scenarios
+  {
+    id: "school_pass_test",
+    name: "Pass Test",
+    description: "Ambitious student passes exam",
+    condition: (char, world) =>
+      char.location === "school" &&
+      char.traits.ambitious > 65 &&
+      world.timeOfDay === "afternoon" &&
+      Math.random() < 0.08,
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "happy";
+      char.traits.confident = Math.min(100, char.traits.confident + 4);
+    },
+    dialogue: ["Yes!", "I passed!", "So proud!"]
+  },
+
+  // Hospital scenarios
+  {
+    id: "hospital_recovery",
+    name: "Hospital Recovery",
+    description: "Injured person heals slowly",
+    condition: (char) =>
+      char.location === "hospital" &&
+      char.energy < 50 &&
+      Math.random() < 0.08,
+    probability: 0.1,
+    effect: (char) => {
+      char.energy = Math.min(100, char.energy + 10);
+      char.mood = "content";
+    },
+    dialogue: ["Feeling better", "Thanks for the help", "Much improved"]
+  },
+
+  // Police Station scenarios
+  {
+    id: "police_interrogation",
+    name: "Police Interrogation",
+    description: "Nervous character panics under questioning",
+    condition: (char) =>
+      char.location === "policeStation" &&
+      char.traits.anxious > 60 &&
+      Math.random() < 0.07,
+    probability: 0.12,
+    effect: (char) => {
+      char.mood = "stressed";
+      char.energy = Math.max(0, char.energy - 20);
+    },
+    dialogue: ["I didn't do it!", "This is a mistake", "Lawyer! Lawyer!"],
+    animationType: "conflict"
+  },
+
+  // Restaurant scenarios
+  {
+    id: "restaurant_fancy_dinner",
+    name: "Fancy Dinner",
+    description: "Charming person enjoys romantic dinner",
+    condition: (char) =>
+      char.location === "restaurant" &&
+      char.traits.charming > 65 &&
+      Math.random() < 0.06,
+    probability: 0.08,
+    effect: (char) => {
+      char.mood = "happy";
+      char.energy = Math.min(100, char.energy + 8);
+    },
+    dialogue: ["Delicious!", "This is wonderful", "Perfect evening"]
+  },
+
+  // Home scenarios
+  {
+    id: "home_nap",
+    name: "Relaxing Nap",
+    description: "Tired person takes restorative nap",
+    condition: (char) =>
+      char.location === "home" &&
+      char.energy < 30 &&
+      Math.random() < 0.1,
+    probability: 0.12,
+    effect: (char) => {
+      char.energy = Math.min(100, char.energy + 30);
+      char.mood = "content";
+    },
+    dialogue: ["So sleepy...", "Time for rest", "Zzzzz"]
+  },
+
+  // Gym scenarios
+  {
+    id: "gym_show_off",
+    name: "Show Off",
+    description: "Competitive person flexes for attention",
+    condition: (char, _world, allChars) => {
+      const nearby = allChars.filter(c => 
+        c.id !== char.id && 
+        c.location === "gym" && 
+        Math.hypot(c.x - char.x, c.y - char.y) < 100
+      );
+      return char.location === "gym" && char.traits.competitive > 70 && nearby.length > 0 && Math.random() < 0.07;
+    },
+    probability: 0.1,
+    effect: (char) => {
+      char.mood = "happy";
+      char.traits.confident = Math.min(100, char.traits.confident + 3);
+      char.energy = Math.max(0, char.energy - 10);
+    },
+    dialogue: ["Check this out!", "Look at those muscles!", "Pretty strong, huh?"]
   }
 ];
 

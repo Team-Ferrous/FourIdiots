@@ -211,7 +211,137 @@ function drawRoom(
                         ctx.beginPath();
                         ctx.arc(elem.x + i * 80, elem.y + 20, 30, 0, Math.PI * 2);
                         ctx.stroke();
+                    break;
+                    break;
                     }
+                    break;
+                
+                case "table":
+                    ctx.fillRect(elem.x, elem.y, 50, 40);
+                    break;
+                case "screen":
+                    ctx.fillRect(elem.x, elem.y, 80, 60);
+                    break;
+                case "store":
+                    ctx.fillRect(elem.x, elem.y, 40, 60);
+                    break;
+                case "lights":
+                    ctx.beginPath();
+                    ctx.arc(elem.x, elem.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "cross":
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(elem.x - 8, elem.y);
+                    ctx.lineTo(elem.x + 8, elem.y);
+                    ctx.moveTo(elem.x, elem.y - 8);
+                    ctx.lineTo(elem.x, elem.y + 8);
+                    ctx.stroke();
+                    break;
+                case "badge":
+                    ctx.fillRect(elem.x - 8, elem.y - 8, 16, 16);
+                    break;
+                case "mailbox":
+                    ctx.fillRect(elem.x, elem.y, 20, 30);
+                    break;
+                case "bench":
+                    ctx.fillRect(elem.x, elem.y, 60, 20);
+                    break;
+                case "cooler":
+                    ctx.fillRect(elem.x, elem.y, 25, 35);
+                    break;
+                case "cabinet":
+                    ctx.fillRect(elem.x, elem.y, 35, 50);
+                    break;
+                case "stool":
+                    ctx.fillRect(elem.x, elem.y, 20, 25);
+                    break;
+                case "shelf":
+                    ctx.fillRect(elem.x, elem.y, 50, 30);
+                    break;
+                case "treadmill":
+                    ctx.fillRect(elem.x, elem.y, 50, 35);
+                    break;
+                case "weights":
+                    ctx.beginPath();
+                    ctx.arc(elem.x - 10, elem.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(elem.x + 10, elem.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "door":
+                    ctx.fillRect(elem.x, elem.y, 25, 40);
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(elem.x, elem.y, 25, 40);
+                    break;
+                case "plant":
+                    ctx.fillRect(elem.x - 8, elem.y + 20, 16, 20);
+                    ctx.beginPath();
+                    ctx.arc(elem.x, elem.y + 10, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "umbrella":
+                    ctx.beginPath();
+                    ctx.arc(elem.x, elem.y, 15, 0, Math.PI);
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(elem.x, elem.y);
+                    ctx.lineTo(elem.x, elem.y + 20);
+                    ctx.stroke();
+                    break;
+                case "sailboat":
+                    ctx.beginPath();
+                    ctx.moveTo(elem.x, elem.y + 20);
+                    ctx.lineTo(elem.x - 15, elem.y + 20);
+                    ctx.lineTo(elem.x, elem.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                case "seat":
+                    ctx.fillRect(elem.x, elem.y, 25, 15);
+                    break;
+                case "curtain":
+                    ctx.fillRect(elem.x, elem.y, 20, 50);
+                    break;
+                case "slot-machine":
+                    ctx.fillRect(elem.x, elem.y, 30, 50);
+                    break;
+                case "chair":
+                    ctx.fillRect(elem.x, elem.y, 20, 20);
+                    break;
+                case "podium":
+                    ctx.fillRect(elem.x, elem.y, 40, 35);
+                    break;
+                case "bed":
+                    ctx.fillRect(elem.x, elem.y, 60, 40);
+                    break;
+                case "cell":
+                    ctx.fillRect(elem.x, elem.y, 50, 50);
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(elem.x, elem.y, 50, 50);
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(elem.x + 15 + i * 15, elem.y);
+                        ctx.lineTo(elem.x + 15 + i * 15, elem.y + 50);
+                        ctx.stroke();
+                    }
+                    break;
+                case "lamp":
+                    ctx.fillRect(elem.x - 3, elem.y + 15, 6, 20);
+                    ctx.beginPath();
+                    ctx.arc(elem.x, elem.y + 8, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                case "chalkboard":
+                    ctx.fillRect(elem.x, elem.y, 60, 40);
+                    break;
+                case "train-car":
+                    ctx.fillRect(elem.x, elem.y, 40, 30);
                     break;
             }
         }
