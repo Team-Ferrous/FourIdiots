@@ -7,6 +7,7 @@
  */
 
 import type { Appearance, PaletteEntry } from "./Appearance";
+import type { LocationId } from "./Location";
 
 import {
     ACCENT_COLORS,
@@ -33,6 +34,7 @@ import {
 } from "./Appearance";
 
 import { SPRITE, drawCitizen } from "./CharacterSprite";
+import { getAllLocations } from "./Location";
 
 const STORAGE_KEY = "four-idiots:citizen";
 
@@ -43,7 +45,7 @@ export type CreatorOptions = {
     onChange?: (appearance: Appearance) => void;
 
     /** Called when the user confirms their citizen. */
-    onConfirm?: (appearance: Appearance, name: string) => void;
+    onConfirm?: (appearance: Appearance, name: string, locationId: LocationId) => void;
 };
 
 export function mountCharacterCreator(
@@ -55,6 +57,7 @@ export function mountCharacterCreator(
     };
 
     let name = "New Citizen";
+    let locationId: LocationId = "park";
 
     root.innerHTML = `
         <div class="creator">
@@ -77,6 +80,11 @@ export function mountCharacterCreator(
                         maxlength="16"
                         aria-label="Citizen name"
                         value="${name}" />
+
+                    <label class="creator-location-label" for="citizen-location">
+                        Starting Area
+                    </label>
+                    <select id="citizen-location" class="creator-location"></select>
 
                     <div class="preview-actions">
                         <button id="randomise" type="button">
@@ -113,6 +121,21 @@ export function mountCharacterCreator(
 
     const nameInput =
         root.querySelector<HTMLInputElement>("#citizen-name")!;
+
+    const locationSelect =
+        root.querySelector<HTMLSelectElement>("#citizen-location")!;
+
+    for (const location of getAllLocations()) {
+        const option = document.createElement("option");
+        option.value = location.id;
+        option.textContent = location.name;
+        option.selected = location.id === locationId;
+        locationSelect.appendChild(option);
+    }
+
+    locationSelect.addEventListener("change", () => {
+        locationId = locationSelect.value as LocationId;
+    });
 
     /** Redraw the preview and refresh which swatches look selected. */
     function update() {
@@ -363,14 +386,15 @@ export function mountCharacterCreator(
 
             statusEl.textContent = `Saved ${trimmed}.`;
 
-            options.onConfirm?.(appearance, trimmed);
+            options.onConfirm?.(appearance, trimmed, locationId);
         });
 
     update();
 
     return {
         getAppearance: () => appearance,
-        getName: () => name
+        getName: () => name,
+        getLocationId: () => locationId
     };
 }
 

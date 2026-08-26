@@ -599,3 +599,67 @@ code {
     background: #6d3ad6;
     border-color: #8a5ae8;
 }
+
+/* Core-world debug / roster UI */
+.world-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.roster-panel {
+    width: 260px;
+    max-height: 450px;
+    overflow: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    background: #ece7dc;
+    border: 3px solid #111;
+    font: 12px monospace;
+}
+
+.roster-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #111;
+}
+
+.roster-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.roster-character {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    text-align: left;
+    font: inherit;
+}
+
+.roster-character span {
+    font-size: 10px;
+}
+
+.roster-delete {
+    align-self: stretch;
+    font: inherit;
+}
+
+.creator-location-label {
+    display: block;
+    margin-top: 10px;
+    font: 12px monospace;
+}
+
+.creator-location {
+    width: 100%;
+    margin: 4px 0 10px;
+    padding: 6px;
+    font: 12px monospace;
+}

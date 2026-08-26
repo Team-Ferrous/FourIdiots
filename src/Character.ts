@@ -48,6 +48,7 @@ export interface Character {
     travelCompleteAt?: number;
 
     conversationPartner?: string;
+    conversationCooldownUntil?: number;
     speech?: string;
     speechUntil?: number;
 

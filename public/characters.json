@@ -1,0 +1,64 @@
+{
+  "characters": [
+    {
+      "id": "bob",
+      "name": "Bob",
+      "job": "Accountant",
+      "hobby": "Fishing",
+      "likes": [],
+      "dislikes": [],
+      "locationId": "office",
+      "x": 150,
+      "y": 250,
+      "traits": { "ambitious": 75, "perfectionist": 70, "focused": 65, "serious": 60, "professional": 80, "emotional": 25, "sociable": 40, "energetic": 55, "clumsy": 15, "loyal": 70 },
+      "mood": "content",
+      "energy": 80,
+      "appearance": { "skin": "#e4b78e", "hairStyle": "short", "hairColor": "#5c3a21", "eyeColor": "#4a2c15", "topStyle": "blazer", "shirtColor": "#3a3a42", "accentColor": "#c4382f", "bottomStyle": "trousers", "trouserColor": "#3f5a7a", "shoeColor": "#4a3020", "hatStyle": "none", "hatColor": "#b03a32", "glassesStyle": "specs" }
+    },
+    {
+      "id": "alice",
+      "name": "Alice",
+      "job": "Teacher",
+      "hobby": "Painting",
+      "likes": [],
+      "dislikes": [],
+      "locationId": "park",
+      "x": 300,
+      "y": 300,
+      "traits": { "empathetic": 80, "charming": 70, "optimistic": 75, "focused": 65, "sociable": 75, "outgoing": 60, "cheerful": 70, "cultured": 70, "adventurous": 60, "protective": 65 },
+      "mood": "content",
+      "energy": 80,
+      "appearance": { "skin": "#f1c9a5", "hairStyle": "long", "hairColor": "#c2571f", "eyeColor": "#3f7a3f", "topStyle": "dress", "shirtColor": "#b04a42", "accentColor": "#f0f0e8", "bottomStyle": "skirt", "trouserColor": "#b04a42", "shoeColor": "#ddddd5", "hatStyle": "none", "hatColor": "#b03a32", "glassesStyle": "none" }
+    },
+    {
+      "id": "jim",
+      "name": "Jim",
+      "job": "Mechanic",
+      "hobby": "Video Games",
+      "likes": [],
+      "dislikes": [],
+      "locationId": "gym",
+      "x": 500,
+      "y": 250,
+      "traits": { "competitive": 75, "energetic": 80, "reckless": 60, "lazy": 35, "cooperative": 50, "joker": 70, "confident": 70, "ambitious": 55, "clumsy": 45, "charming": 60 },
+      "mood": "content",
+      "energy": 80,
+      "appearance": { "skin": "#8a5a34", "hairStyle": "messy", "hairColor": "#1b1b1f", "eyeColor": "#4a2c15", "topStyle": "hoodie", "shirtColor": "#3f8a8a", "accentColor": "#e8d24a", "bottomStyle": "shorts", "trouserColor": "#5c6a3a", "shoeColor": "#8a3a34", "hatStyle": "cap", "hatColor": "#3a5aa8", "glassesStyle": "none" }
+    },
+    {
+      "id": "sarah",
+      "name": "Sarah",
+      "job": "Bartender",
+      "hobby": "Gardening",
+      "likes": [],
+      "dislikes": [],
+      "locationId": "bar",
+      "x": 650,
+      "y": 300,
+      "traits": { "sociable": 85, "charming": 75, "empathetic": 70, "outgoing": 80, "cheerful": 75, "loyal": 80, "protective": 70, "honest": 70, "ambitious": 50, "energetic": 70 },
+      "mood": "content",
+      "energy": 80,
+      "appearance": { "skin": "#573520", "hairStyle": "afro", "hairColor": "#3a2418", "eyeColor": "#8a6a2f", "topStyle": "overalls", "shirtColor": "#3f5a7a", "accentColor": "#e8d24a", "bottomStyle": "trousers", "trouserColor": "#3f5a7a", "shoeColor": "#1f1f24", "hatStyle": "bandana", "hatColor": "#7a4fa8", "glassesStyle": "none" }
+    }
+  ]
+}
