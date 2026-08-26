@@ -29,3 +29,7 @@ The panel beside the canvas shows every living citizen, their current area, and 
 - `public/characters.json` is deliberately one big editable seed file for now.
 
 The personality/scenario/train experiments remain available but are not being allowed to replace this core flow.
+
+## Chat log
+
+`ChatLog.ts` owns a small session history of the last 100 spoken lines. The simulation writes travel announcements and conversation speech into it. `main.ts` renders the log directly beneath the world view and automatically scrolls to the newest entry. The log is intentionally session-only for now; world persistence remains focused on citizen state.

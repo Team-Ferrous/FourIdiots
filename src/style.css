@@ -663,3 +663,69 @@ code {
     padding: 6px;
     font: 12px monospace;
 }
+
+/* Conversation history under the world view. */
+.chat-log-panel {
+    width: 100%;
+    margin-top: 12px;
+    box-sizing: border-box;
+    background: #111318;
+    border: 3px solid #000;
+    color: #dedbe7;
+    font: 12px var(--mono);
+    text-align: left;
+}
+
+.chat-log-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: #23252d;
+    border-bottom: 2px solid #000;
+}
+
+.chat-log-header button {
+    padding: 3px 9px;
+    cursor: pointer;
+    font: 11px var(--mono);
+    color: #ddd9e8;
+    background: #343640;
+    border: 1px solid #555865;
+}
+
+.chat-log {
+    height: 130px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    scrollbar-gutter: stable;
+}
+
+.chat-line {
+    display: flex;
+    gap: 6px;
+    min-height: 18px;
+    line-height: 18px;
+    white-space: normal;
+}
+
+.chat-location {
+    flex: 0 0 auto;
+    color: #777f91;
+}
+
+.chat-speaker {
+    flex: 0 0 auto;
+    color: #c7a8ff;
+}
+
+.chat-text {
+    color: #e5e2eb;
+    overflow-wrap: anywhere;
+}
+
+.chat-line.system .chat-speaker,
+.chat-line.system .chat-text {
+    color: #9aa3b7;
+}

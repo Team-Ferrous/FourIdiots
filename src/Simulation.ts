@@ -4,6 +4,7 @@ import type { LocationId } from "./Location";
 import type { WorldState as ScenarioWorldState } from "./Scenarios";
 
 import { getLocation } from "./Location";
+import { addChatLine } from "./ChatLog";
 import { initializeTraits } from "./Personality";
 import {
     addCharacter,
@@ -143,6 +144,13 @@ function beginTravel(
     character.speech = `I'm going to ${target.name}.`;
     character.speechUntil = timestamp + TRAVEL_ANNOUNCE_MS;
     character.lastEventTime = timestamp;
+
+    addChatLine(
+        character.name,
+        character.speech,
+        timestamp,
+        character.locationId
+    );
 }
 
 function completeTravel(
@@ -246,6 +254,9 @@ function startConversation(
     b.speechUntil = timestamp + 4000;
     a.lastEventTime = timestamp;
     b.lastEventTime = timestamp;
+
+    addChatLine(a.name, a.speech, timestamp, a.locationId);
+    addChatLine(b.name, b.speech, timestamp, b.locationId);
 
     window.setTimeout(() => endConversation(a, b), CONVERSATION_MS);
 }
