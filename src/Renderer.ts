@@ -1,10 +1,8 @@
-import type { Character } from "./Character";
+import type { Character, RenderLayer } from "./Character";
 import type { LocationId } from "./Location";
 import { SPRITE, drawCitizen } from "./CharacterSprite";
 import { getLocation } from "./Location";
 import { trainState } from "./Simulation";
-
-export type RenderLayer = "background" | "mainground" | "foreground";
 
 function getCharacterLayer(character: Character): RenderLayer {
   if (character.renderLayer) return character.renderLayer;
@@ -26,7 +24,7 @@ export function renderWorld(
     drawRoom(ctx, currentLocation);
 
     // Filter characters in current location
-    const locCharacters = characters.filter(c => c.location === currentLocation);
+    const locCharacters = characters.filter(c => c.locationId === currentLocation);
     
     // Separate into layers
     const backgroundChars = locCharacters.filter(c => getCharacterLayer(c) === "background");
@@ -206,16 +204,14 @@ function drawRoom(
                     ctx.fillRect(elem.x, elem.y, 25, 50);
                     break;
                 case "waves":
-                    ctx.fillStyle = elem.color || "#4a90e2";
+                    ctx.strokeStyle = elem.color || "#4a90e2";
                     for (let i = 0; i < 5; i++) {
                         ctx.beginPath();
                         ctx.arc(elem.x + i * 80, elem.y + 20, 30, 0, Math.PI * 2);
                         ctx.stroke();
-                    break;
-                    break;
                     }
                     break;
-                
+
                 case "table":
                     ctx.fillRect(elem.x, elem.y, 50, 40);
                     break;

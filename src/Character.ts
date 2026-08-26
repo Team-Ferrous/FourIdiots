@@ -12,41 +12,44 @@ export type CharacterState =
 
 export type RenderLayer = "background" | "mainground" | "foreground";
 
-export type MoodType = "happy" | "sad" | "angry" | "stressed" | "content" | "scared";
+export type MoodType =
+    | "happy"
+    | "sad"
+    | "angry"
+    | "stressed"
+    | "content"
+    | "scared";
 
-export type Character = {
+export interface Character {
     id: string;
     name: string;
 
     job: string;
     hobby: string;
-
-    appearance: Appearance;
-
     likes: string[];
     dislikes: string[];
 
-    location: LocationId;
+    appearance: Appearance;
+
+    /** The room/space the character currently occupies. */
+    locationId: LocationId;
 
     x: number;
     y: number;
-
     targetX: number;
     targetY: number;
 
     state: CharacterState;
 
-    conversationPartner?: string;
-
-    speech?: string;
-    speechUntil?: number;
-
-    traits: Record<TraitId, number>;
-    mood: MoodType;
-    energy: number;
-    lastEventTime: number;
-
+    /** Optional presentation overrides. */
     renderLayer?: RenderLayer;
     isOnTrain?: boolean;
-    boardingProgress?: number;
+
+    /** Lightweight personality/state hooks for later simulation work. */
+    traits?: TraitId[];
+    mood?: MoodType;
+
+    conversationPartner?: string;
+    speech?: string;
+    speechUntil?: number;
 }
