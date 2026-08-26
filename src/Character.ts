@@ -6,6 +6,7 @@ export type CharacterState =
     | "idle"
     | "walking"
     | "talking"
+    | "traveling"
     | "boarding"
     | "on_train"
     | "disembarking";
@@ -31,7 +32,7 @@ export interface Character {
 
     appearance: Appearance;
 
-    /** The room/space the character currently occupies. */
+    // Single source of truth for where a character currently exists.
     locationId: LocationId;
 
     x: number;
@@ -41,15 +42,23 @@ export interface Character {
 
     state: CharacterState;
 
-    /** Optional presentation overrides. */
-    renderLayer?: RenderLayer;
-    isOnTrain?: boolean;
-
-    /** Lightweight personality/state hooks for later simulation work. */
-    traits?: TraitId[];
-    mood?: MoodType;
+    // Simple area-to-area travel intent. The simulation announces the move,
+    // waits briefly, then commits locationId to the target room.
+    travelTargetId?: LocationId;
+    travelCompleteAt?: number;
 
     conversationPartner?: string;
     speech?: string;
     speechUntil?: number;
+
+    // These are retained for the richer systems that already exist, but the
+    // core loop does not mutate them yet. They are data hooks, not drivers.
+    traits: Record<TraitId, number>;
+    mood: MoodType;
+    energy: number;
+    lastEventTime: number;
+
+    // Optional presentation / future transport hooks.
+    renderLayer?: RenderLayer;
+    isOnTrain?: boolean;
 }

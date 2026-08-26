@@ -2,12 +2,11 @@ import type { Character, RenderLayer } from "./Character";
 import type { LocationId } from "./Location";
 import { SPRITE, drawCitizen } from "./CharacterSprite";
 import { getLocation } from "./Location";
-import { trainState } from "./Simulation";
 
 function getCharacterLayer(character: Character): RenderLayer {
   if (character.renderLayer) return character.renderLayer;
-  if (character.y > 320) return "background";
-  if (character.y < 150) return "foreground";
+  if (character.y < 220) return "background";
+  if (character.y > 320) return "foreground";
   return "mainground";
 }
 
@@ -81,10 +80,7 @@ function renderForegroundLayer(
     currentLocation: LocationId,
     elapsedTime: number
 ) {
-    // Filter out characters on train - they don't render in foreground
-    const sorted = [...characters]
-        .filter(c => !c.isOnTrain)
-        .sort((a, b) => a.y - b.y);
+    const sorted = [...characters].sort((a, b) => a.y - b.y);
 
     ctx.save();
     ctx.globalAlpha = 1.0;
@@ -93,70 +89,8 @@ function renderForegroundLayer(
         drawCharacter(ctx, character, elapsedTime, 1.1);
     }
 
-    // Only draw train at train station
-    if (currentLocation === "train") {
-        drawTrain(ctx);
-    }
 
     ctx.restore();
-}
-
-function drawTrain(ctx: CanvasRenderingContext2D) {
-    const trainBaseX = 150;
-    const trainY = 100;
-    
-    // Calculate train position during departure
-    let trainX = trainBaseX;
-    if (trainState.isDeparting) {
-        // Slide from 150 to -300 over departure duration
-        const departureDistance = trainBaseX + 300;
-        trainX = trainBaseX - (departureDistance * trainState.departureProgress);
-    }
-
-    ctx.fillStyle = "#8b0000";
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 2;
-
-    // Train engine
-    ctx.fillRect(trainX, trainY, 60, 40);
-    ctx.strokeRect(trainX, trainY, 60, 40);
-
-    // Train window
-    ctx.fillStyle = "#87ceeb";
-    ctx.fillRect(trainX + 10, trainY + 10, 20, 15);
-    ctx.strokeRect(trainX + 10, trainY + 10, 20, 15);
-
-    // Train cars
-    for (let i = 1; i <= 3; i++) {
-        ctx.fillStyle = "#8b0000";
-        ctx.fillRect(trainX + 60 + (i * 45), trainY, 40, 40);
-        ctx.strokeRect(trainX + 60 + (i * 45), trainY, 40, 40);
-
-        // Windows
-        ctx.fillStyle = "#87ceeb";
-        ctx.fillRect(trainX + 70 + (i * 45), trainY + 8, 15, 12);
-        ctx.fillRect(trainX + 70 + (i * 45), trainY + 22, 15, 12);
-    }
-
-    // Only draw track/platform if not fully departed
-    if (trainState.departureProgress < 1) {
-        // Track
-        ctx.strokeStyle = "#654321";
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(0, trainY + 40);
-        ctx.lineTo(800, trainY + 40);
-        ctx.stroke();
-
-        // Platform
-        ctx.fillStyle = "#8b7355";
-        ctx.fillRect(50, trainY + 40, 700, 30);
-        
-        // Platform edge
-        ctx.strokeStyle = "#654321";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(50, trainY + 40, 700, 30);
-    }
 }
 
 function drawRoom(

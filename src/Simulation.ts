@@ -1,45 +1,42 @@
 import type { Character } from "./Character";
 import type { Appearance } from "./Appearance";
 import type { LocationId } from "./Location";
-import type { TraitId } from "./Personality";
+import type { WorldState } from "./Scenarios";
+
 import { DEFAULT_APPEARANCE } from "./Appearance";
 import { getLocation } from "./Location";
-import { initializeTraits, getTrait as getTraitDef } from "./Personality";
-import { checkScenarios, executeScenario } from "./Scenarios";
-import type { WorldState } from "./Scenarios";
+import { initializeTraits } from "./Personality";
 
 const WALK_SPEED = 35;
 const TALK_DISTANCE = 55;
 
+// These are deliberately modest. The point is to make the world visibly
+// breathe, not to have everybody constantly firing actions every frame.
+const WANDER_CHANCE_PER_SECOND = 0.45;
+const TRAVEL_CHANCE_PER_SECOND = 0.035;
+const CONVERSATION_CHANCE_PER_SECOND = 0.08;
+const TRAVEL_ANNOUNCE_MS = 1800;
+const CONVERSATION_MS = 5000;
+
 export let worldState: WorldState = {
-  weather: "sunny",
-  timeOfDay: "afternoon",
-  eventType: "none",
-  temperature: 70
+    weather: "sunny",
+    timeOfDay: "afternoon",
+    eventType: "none",
+    temperature: 70
 };
 
-// Train system state
-export let trainState = {
-  isAtStation: true,
-  passengersBoarded: [] as string[],
-  departureCountdown: 0,
-  isDeparting: false,
-  departureProgress: 0
+/**
+ * The richer train system can be reattached later. Keeping the public object
+ * here means work that already imports trainState does not have to be thrown
+ * away while the core world flow is stabilised.
+ */
+export const trainState = {
+    isAtStation: true,
+    passengersBoarded: [] as string[],
+    departureCountdown: 0,
+    isDeparting: false,
+    departureProgress: 0
 };
-
-const TRAIN_BOARD_TARGET_X = 200;
-const TRAIN_BOARD_TARGET_Y = 100;
-const TRAIN_DEPARTURE_DELAY = 5000;
-const TRAIN_DEPARTURE_DURATION = 3000;
-
-function getTimeOfDay(timestamp: number): "morning" | "afternoon" | "evening" | "night" {
-  const seconds = timestamp / 1000;
-  const hour = Math.floor((seconds / 3600) % 24);
-  if (hour < 6) return "night";
-  if (hour < 12) return "morning";
-  if (hour < 18) return "afternoon";
-  return "evening";
-}
 
 export const characters: Character[] = [
     makeCharacter(
@@ -51,8 +48,9 @@ export const characters: Character[] = [
         250,
         "office",
         {
-            ambitious: 75, perfectionist: 70, focused: 65, serious: 60, professional: 80,
-            emotional: 25, sociable: 40, energetic: 55, clumsy: 15, loyal: 70
+            ambitious: 75, perfectionist: 70, focused: 65, serious: 60,
+            professional: 80, emotional: 25, sociable: 40, energetic: 55,
+            clumsy: 15, loyal: 70
         },
         {
             skin: "#e4b78e",
@@ -70,7 +68,6 @@ export const characters: Character[] = [
             glassesStyle: "specs"
         }
     ),
-
     makeCharacter(
         "alice",
         "Alice",
@@ -80,8 +77,9 @@ export const characters: Character[] = [
         300,
         "park",
         {
-            empathetic: 80, charming: 70, optimistic: 75, focused: 65, sociable: 75,
-            outgoing: 60, cheerful: 70, cultured: 70, adventurous: 60, protective: 65
+            empathetic: 80, charming: 70, optimistic: 75, focused: 65,
+            sociable: 75, outgoing: 60, cheerful: 70, cultured: 70,
+            adventurous: 60, protective: 65
         },
         {
             skin: "#f1c9a5",
@@ -99,7 +97,6 @@ export const characters: Character[] = [
             glassesStyle: "none"
         }
     ),
-
     makeCharacter(
         "jim",
         "Jim",
@@ -109,8 +106,9 @@ export const characters: Character[] = [
         250,
         "gym",
         {
-            competitive: 75, energetic: 80, reckless: 60, lazy: 35, cooperative: 50,
-            joker: 70, confident: 70, ambitious: 55, clumsy: 45, charming: 60
+            competitive: 75, energetic: 80, reckless: 60, lazy: 35,
+            cooperative: 50, joker: 70, confident: 70, ambitious: 55,
+            clumsy: 45, charming: 60
         },
         {
             skin: "#8a5a34",
@@ -128,7 +126,6 @@ export const characters: Character[] = [
             glassesStyle: "none"
         }
     ),
-
     makeCharacter(
         "sarah",
         "Sarah",
@@ -138,8 +135,9 @@ export const characters: Character[] = [
         300,
         "bar",
         {
-            sociable: 85, charming: 75, empathetic: 70, outgoing: 80, cheerful: 75,
-            loyal: 80, protective: 70, honest: 70, ambitious: 50, energetic: 70
+            sociable: 85, charming: 75, empathetic: 70, outgoing: 80,
+            cheerful: 75, loyal: 80, protective: 70, honest: 70,
+            ambitious: 50, energetic: 70
         },
         {
             skin: "#573520",
@@ -166,14 +164,16 @@ function makeCharacter(
     hobby: string,
     x: number,
     y: number,
-    location: LocationId,
-    traitOverrides: Partial<Record<string, number>>,
+    locationId: LocationId,
+    traitOverrides: Partial<Record<string, number>> = {},
     appearance: Appearance = DEFAULT_APPEARANCE
 ): Character {
     const traits = initializeTraits();
-    
+
     for (const [key, value] of Object.entries(traitOverrides)) {
-        (traits as any)[key] = value;
+        if (key in traits && typeof value === "number") {
+            (traits as Record<string, number>)[key] = value;
+        }
     }
 
     return {
@@ -181,22 +181,15 @@ function makeCharacter(
         name,
         job,
         hobby,
-
-        appearance,
-
         likes: [],
         dislikes: [],
-
-        location,
-
+        appearance,
+        locationId,
         x,
         y,
-
         targetX: x,
         targetY: y,
-
         state: "idle",
-
         traits,
         mood: "content",
         energy: 80,
@@ -209,12 +202,7 @@ export function addCitizen(
     name: string
 ): Character {
     const locationId: LocationId = "park";
-    const location = getLocation(locationId);
-    
-    const spawn =
-        location.destinations[
-            Math.floor(Math.random() * location.destinations.length)
-        ];
+    const spawn = randomDestination(locationId);
 
     const character = makeCharacter(
         `citizen-${Date.now()}`,
@@ -229,7 +217,6 @@ export function addCitizen(
     );
 
     characters.push(character);
-
     return character;
 }
 
@@ -238,101 +225,12 @@ export function updateSimulation(
     timestamp: number
 ) {
     worldState.timeOfDay = getTimeOfDay(timestamp);
-    
-    // Update train departing state
-    if (trainState.departureCountdown > 0) {
-        trainState.departureCountdown -= deltaTime * 1000;
-        if (trainState.departureCountdown <= 0) {
-            trainState.isDeparting = true;
-            trainState.departureProgress = 0;
-        }
-    }
 
-    if (trainState.isDeparting) {
-        trainState.departureProgress += (deltaTime * 1000) / TRAIN_DEPARTURE_DURATION;
-        if (trainState.departureProgress >= 1) {
-            trainState.isDeparting = false;
-            trainState.passengersBoarded = [];
-            trainState.departureProgress = 0;
-            for (const char of characters.filter(c => c.isOnTrain)) {
-                char.isOnTrain = false;
-                char.state = "idle";
-                char.x = 400;
-                char.y = 300;
-            }
-        }
-    }
-    
     for (const character of characters) {
-        // Boarding logic for train station
-        if (character.location === "train" && !character.isOnTrain && character.state === "idle" && character.y < 150 && Math.random() < 0.005) {
-            character.state = "boarding";
-            character.targetX = TRAIN_BOARD_TARGET_X;
-            character.targetY = TRAIN_BOARD_TARGET_Y;
-        }
-
-        // Check if character reached boarding point
-        if (character.state === "boarding") {
-            const dx = TRAIN_BOARD_TARGET_X - character.x;
-            const dy = TRAIN_BOARD_TARGET_Y - character.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 5) {
-                character.isOnTrain = true;
-                character.state = "on_train";
-                trainState.passengersBoarded.push(character.id);
-                if (trainState.passengersBoarded.length > 0 && trainState.departureCountdown === 0) {
-                    trainState.departureCountdown = TRAIN_DEPARTURE_DELAY;
-                }
-            }
-        }
-
         updateCharacter(character, deltaTime, timestamp);
-        updateTraits(character, deltaTime);
-        checkAndExecuteScenarios(character);
     }
 
-    checkForConversations(timestamp);
-}
-
-function updateTraits(character: Character, deltaTime: number) {
-    const traitEntries = Object.entries(character.traits) as Array<[TraitId, number]>;
-    
-    for (const [traitId, value] of traitEntries) {
-        const trait = getTraitDef(traitId);
-        if (!trait) continue;
-
-        const volatility = trait.volatility;
-        const driftAmount = (Math.random() - 0.5) * volatility * 2;
-        
-        let newValue = value + driftAmount * deltaTime * 10;
-        newValue = Math.max(0, Math.min(100, newValue));
-        
-        if (trait.conflictsWith) {
-            for (const conflictId of trait.conflictsWith) {
-                const conflictValue = character.traits[conflictId];
-                if (conflictValue && newValue > 70 && conflictValue > 70) {
-                    newValue = Math.min(newValue, 70);
-                }
-            }
-        }
-
-        character.traits[traitId] = newValue;
-    }
-
-    character.energy = Math.max(0, Math.min(100, character.energy - deltaTime * 2));
-    
-    if (character.mood === "happy") {
-        character.energy = Math.min(100, character.energy + deltaTime * 1.5);
-    } else if (character.mood === "stressed" || character.mood === "angry") {
-        character.energy = Math.max(0, character.energy - deltaTime * 3);
-    }
-}
-
-function checkAndExecuteScenarios(character: Character) {
-    const scenario = checkScenarios(character, worldState, characters);
-    if (scenario) {
-        executeScenario(scenario, character, worldState, characters);
-    }
+    checkForConversations(deltaTime, timestamp);
 }
 
 function updateCharacter(
@@ -340,135 +238,128 @@ function updateCharacter(
     deltaTime: number,
     timestamp: number
 ) {
-    if (character.state === "talking") {
+    clearExpiredSpeech(character, timestamp);
 
+    // Travel is an explicit two-step action: announce intent, then move rooms.
+    if (character.state === "traveling") {
         if (
-            character.speechUntil &&
-            timestamp > character.speechUntil
+            character.travelTargetId &&
+            character.travelCompleteAt !== undefined &&
+            timestamp >= character.travelCompleteAt
         ) {
-            character.speech = undefined;
+            completeTravel(character, character.travelTargetId, timestamp);
         }
-
         return;
     }
 
-    const dx =
-        character.targetX - character.x;
+    if (character.state === "talking") {
+        return;
+    }
 
-    const dy =
-        character.targetY - character.y;
+    const dx = character.targetX - character.x;
+    const dy = character.targetY - character.y;
+    const distance = Math.hypot(dx, dy);
 
-    const distance =
-        Math.sqrt(dx * dx + dy * dy);
+    if (distance >= 3) {
+        character.state = "walking";
 
-    if (distance < 3) {
-        character.x = character.targetX;
-        character.y = character.targetY;
+        const step = Math.min(WALK_SPEED * deltaTime, distance);
+        character.x += (dx / distance) * step;
+        character.y += (dy / distance) * step;
+        return;
+    }
 
-        character.state = "idle";
+    character.x = character.targetX;
+    character.y = character.targetY;
+    character.state = "idle";
 
-        const location = getLocation(character.location);
-        const atExit = location.exits.find(
-            exit => Math.abs(exit.x - character.x) < 20 && Math.abs(exit.y - character.y) < 20
-        );
-
-        if (atExit && Math.random() < 0.03) {
-            character.location = atExit.target;
-            const newLocation = getLocation(character.location);
-            const spawn = newLocation.destinations[
-                Math.floor(Math.random() * newLocation.destinations.length)
-            ];
-            character.x = spawn.x;
-            character.y = spawn.y;
-            character.targetX = spawn.x;
-            character.targetY = spawn.y;
+    // The important flow: a character decides to leave, says where they are
+    // going, then the simulation changes their room after the announcement.
+    if (Math.random() < TRAVEL_CHANCE_PER_SECOND * deltaTime) {
+        const target = chooseConnectedLocation(character.locationId);
+        if (target) {
+            beginTravel(character, target, timestamp);
             return;
         }
-
-        if (Math.random() < 0.01) {
-            chooseNewDestination(character);
-        }
-
-        return;
     }
 
-    character.state = "walking";
-
-    const step =
-        Math.min(
-            WALK_SPEED * deltaTime,
-            distance
-        );
-
-    character.x +=
-        (dx / distance) * step;
-
-    character.y +=
-        (dy / distance) * step;
+    if (Math.random() < WANDER_CHANCE_PER_SECOND * deltaTime) {
+        chooseNewDestination(character);
+    }
 }
 
-function chooseNewDestination(
-    character: Character
+function beginTravel(
+    character: Character,
+    targetId: LocationId,
+    timestamp: number
 ) {
-    const location = getLocation(character.location);
-    
-    const destination =
-        location.destinations[
-            Math.floor(
-                Math.random() *
-                location.destinations.length
-            )
-        ];
+    const target = getLocation(targetId);
 
+    character.state = "traveling";
+    character.travelTargetId = targetId;
+    character.travelCompleteAt = timestamp + TRAVEL_ANNOUNCE_MS;
+    character.speech = `I'm going to ${target.name}.`;
+    character.speechUntil = timestamp + TRAVEL_ANNOUNCE_MS;
+    character.lastEventTime = timestamp;
+}
+
+function completeTravel(
+    character: Character,
+    targetId: LocationId,
+    timestamp: number
+) {
+    const spawn = randomDestination(targetId);
+
+    character.locationId = targetId;
+    character.x = spawn.x;
+    character.y = spawn.y;
+    character.targetX = spawn.x;
+    character.targetY = spawn.y;
+    character.state = "idle";
+    character.travelTargetId = undefined;
+    character.travelCompleteAt = undefined;
+    character.speech = undefined;
+    character.speechUntil = undefined;
+    character.lastEventTime = timestamp;
+}
+
+function chooseConnectedLocation(
+    locationId: LocationId
+): LocationId | null {
+    const exits = getLocation(locationId).exits;
+    if (exits.length === 0) return null;
+
+    return exits[Math.floor(Math.random() * exits.length)].target;
+}
+
+function chooseNewDestination(character: Character) {
+    const destination = randomDestination(character.locationId);
     character.targetX = destination.x;
     character.targetY = destination.y;
 }
 
+function randomDestination(locationId: LocationId) {
+    const destinations = getLocation(locationId).destinations;
+    return destinations[Math.floor(Math.random() * destinations.length)];
+}
+
 function checkForConversations(
-    currentTime: number
+    deltaTime: number,
+    timestamp: number
 ) {
-    for (
-        let a = 0;
-        a < characters.length;
-        a++
-    ) {
-        for (
-            let b = a + 1;
-            b < characters.length;
-            b++
-        ) {
+    for (let a = 0; a < characters.length; a++) {
+        for (let b = a + 1; b < characters.length; b++) {
             const charA = characters[a];
             const charB = characters[b];
 
-            if (charA.location !== charB.location) {
-                continue;
-            }
+            if (charA.locationId !== charB.locationId) continue;
+            if (charA.state !== "idle" || charB.state !== "idle") continue;
 
-            if (
-                charA.state === "talking" ||
-                charB.state === "talking"
-            ) {
-                continue;
-            }
+            const distance = Math.hypot(charA.x - charB.x, charA.y - charB.y);
+            if (distance >= TALK_DISTANCE) continue;
 
-            const dx =
-                charA.x - charB.x;
-
-            const dy =
-                charA.y - charB.y;
-
-            const distance =
-                Math.sqrt(dx * dx + dy * dy);
-
-            if (
-                distance < TALK_DISTANCE &&
-                Math.random() < 0.003
-            ) {
-                startConversation(
-                    charA,
-                    charB,
-                    currentTime
-                );
+            if (Math.random() < CONVERSATION_CHANCE_PER_SECOND * deltaTime) {
+                startConversation(charA, charB, timestamp);
             }
         }
     }
@@ -477,45 +368,58 @@ function checkForConversations(
 function startConversation(
     a: Character,
     b: Character,
-    currentTime: number
+    timestamp: number
 ) {
     a.state = "talking";
     b.state = "talking";
-
     a.conversationPartner = b.id;
     b.conversationPartner = a.id;
 
     a.speech = `Hey, ${b.name}.`;
     b.speech = `Hey, ${a.name}.`;
+    a.speechUntil = timestamp + 4000;
+    b.speechUntil = timestamp + 4000;
+    a.lastEventTime = timestamp;
+    b.lastEventTime = timestamp;
 
-    a.speechUntil =
-        currentTime + 4000;
-
-    b.speechUntil =
-        currentTime + 4000;
-
-    console.log(
-        `${a.name} started talking to ${b.name}`
-    );
-
-    window.setTimeout(() => {
-        endConversation(a, b);
-    }, 5000);
+    window.setTimeout(() => endConversation(a, b), CONVERSATION_MS);
 }
 
-function endConversation(
-    a: Character,
-    b: Character
-) {
-    a.state = "idle";
-    b.state = "idle";
+function endConversation(a: Character, b: Character) {
+    // A later system may have changed either character's state while the timer
+    // was running. Do not stomp that newer decision.
+    if (a.conversationPartner === b.id) {
+        a.conversationPartner = undefined;
+        a.speech = undefined;
+        a.speechUntil = undefined;
+        if (a.state === "talking") a.state = "idle";
+        chooseNewDestination(a);
+    }
 
-    a.conversationPartner = undefined;
-    b.conversationPartner = undefined;
+    if (b.conversationPartner === a.id) {
+        b.conversationPartner = undefined;
+        b.speech = undefined;
+        b.speechUntil = undefined;
+        if (b.state === "talking") b.state = "idle";
+        chooseNewDestination(b);
+    }
+}
 
-    a.speech = undefined;
-    b.speech = undefined;
+function clearExpiredSpeech(character: Character, timestamp: number) {
+    if (character.speechUntil !== undefined && timestamp >= character.speechUntil) {
+        character.speech = undefined;
+        character.speechUntil = undefined;
+    }
+}
 
-    chooseNewDestination(a);
-    chooseNewDestination(b);
+function getTimeOfDay(
+    timestamp: number
+): "morning" | "afternoon" | "evening" | "night" {
+    const seconds = timestamp / 1000;
+    const hour = Math.floor((seconds / 3600) % 24);
+
+    if (hour < 6) return "night";
+    if (hour < 12) return "morning";
+    if (hour < 18) return "afternoon";
+    return "evening";
 }

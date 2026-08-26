@@ -39,7 +39,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Work Late",
     description: "Ambitious character stays late at office",
     condition: (char, world) => {
-      return char.location === "office" && 
+      return char.locationId === "office" && 
         char.traits.ambitious > 65 && 
         world.timeOfDay === "evening" &&
         Math.random() < 0.2;
@@ -60,7 +60,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === char.location && 
+        c.locationId === char.locationId && 
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
       return char.traits.joker > 60 && nearby.length > 0 && Math.random() < 0.3;
@@ -71,7 +71,7 @@ export const SCENARIOS: Scenario[] = [
       char.mood = "happy";
       const nearby = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
       nearby.forEach(c => {
@@ -89,7 +89,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location && 
+        c.locationId === char.locationId && 
         Math.hypot(c.x - char.x, c.y - char.y) < 80
       );
       return char.traits.irritable > 70 && char.energy < 30 && !!nearby && Math.random() < 0.15;
@@ -99,7 +99,7 @@ export const SCENARIOS: Scenario[] = [
       char.mood = "angry";
       const nearby = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         Math.hypot(c.x - char.x, c.y - char.y) < 80
       );
       if (nearby) {
@@ -119,7 +119,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         Math.hypot(c.x - char.x, c.y - char.y) < 120
       ).length;
       return char.traits.anxious > 65 && nearby > 2 && Math.random() < 0.25;
@@ -175,7 +175,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const rivals = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         char.dislikes.includes(c.id) &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
@@ -187,7 +187,7 @@ export const SCENARIOS: Scenario[] = [
       char.mood = "angry";
       const rival = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         char.dislikes.includes(c.id)
       );
       if (rival) {
@@ -204,7 +204,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const upset = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         char.likes.includes(c.id) &&
         c.mood === "sad" &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
@@ -234,7 +234,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const stranger = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         !char.likes.includes(c.id) &&
         !char.dislikes.includes(c.id) &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
@@ -282,7 +282,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const distressed = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         (c.mood === "sad" || c.mood === "stressed") &&
         char.likes.includes(c.id)
       );
@@ -319,7 +319,7 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
       return char.traits.honest > 75 && !!nearby && Math.random() < 0.15;
@@ -328,7 +328,7 @@ export const SCENARIOS: Scenario[] = [
     effect: (char, allChars) => {
       const nearby = allChars.find(c => 
         c.id !== char.id && 
-        c.location === char.location &&
+        c.locationId === char.locationId &&
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
       if (nearby) {
@@ -347,7 +347,7 @@ export const SCENARIOS: Scenario[] = [
     id: "beach_sunburn",
     name: "Sunburned",
     description: "Character gets sunburned",
-    condition: (char) => char.location === "beach" && char.traits.energetic > 60 && Math.random() < 0.1,
+    condition: (char) => char.locationId === "beach" && char.traits.energetic > 60 && Math.random() < 0.1,
     probability: 0.1,
     effect: (char) => {
       char.mood = "stressed";
@@ -362,14 +362,14 @@ export const SCENARIOS: Scenario[] = [
     description: "Romance blooms on the beach",
     condition: (char, _world, allChars) => {
       const strangers = allChars.filter(c => 
-        c.id !== char.id && c.location === "beach" && !char.likes.includes(c.id)
+        c.id !== char.id && c.locationId === "beach" && !char.likes.includes(c.id)
       );
       return char.traits.charming > 70 && strangers.length > 0 && Math.random() < 0.2;
     },
     probability: 0.2,
     effect: (char, allChars) => {
       const stranger = allChars.find(c => 
-        c.id !== char.id && c.location === "beach" && !char.likes.includes(c.id)
+        c.id !== char.id && c.locationId === "beach" && !char.likes.includes(c.id)
       );
       if (stranger) {
         char.likes.push(stranger.id);
@@ -386,9 +386,9 @@ export const SCENARIOS: Scenario[] = [
     description: "Too many people in the mall",
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
-        c.id !== char.id && c.location === "mall"
+        c.id !== char.id && c.locationId === "mall"
       ).length;
-      return char.location === "mall" && nearby > 4 && char.traits.anxious > 50 && Math.random() < 0.2;
+      return char.locationId === "mall" && nearby > 4 && char.traits.anxious > 50 && Math.random() < 0.2;
     },
     probability: 0.2,
     effect: (char) => {
@@ -402,7 +402,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Shopping Spree",
     description: "Character gets excited about shopping",
     condition: (char) => 
-      char.location === "mall" && char.traits.fashionable > 70 && char.energy > 70 && Math.random() < 0.15,
+      char.locationId === "mall" && char.traits.fashionable > 70 && char.energy > 70 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.traits.fashionable = Math.min(100, char.traits.fashionable + 5);
@@ -417,7 +417,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Bad Service",
     description: "Frustrated with slow service",
     condition: (char) => 
-      char.location === "restaurant" && char.traits.irritable > 60 && Math.random() < 0.1,
+      char.locationId === "restaurant" && char.traits.irritable > 60 && Math.random() < 0.1,
     probability: 0.1,
     effect: (char) => {
       char.mood = "angry";
@@ -431,7 +431,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Delicious Food",
     description: "Character enjoys great meal",
     condition: (char) => 
-      char.location === "restaurant" && char.traits.cultured > 60 && Math.random() < 0.2,
+      char.locationId === "restaurant" && char.traits.cultured > 60 && Math.random() < 0.2,
     probability: 0.2,
     effect: (char) => {
       char.mood = "happy";
@@ -446,7 +446,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Deep Focus",
     description: "Get completely immersed in study",
     condition: (char) => 
-      char.location === "library" && char.traits.focused > 70 && char.energy > 50 && Math.random() < 0.15,
+      char.locationId === "library" && char.traits.focused > 70 && char.energy > 50 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.traits.focused = Math.min(100, char.traits.focused + 8);
@@ -461,7 +461,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Quiet Rebellion",
     description: "Joker tries to be quiet (and fails)",
     condition: (char) => 
-      char.location === "library" && char.traits.joker > 70 && Math.random() < 0.2,
+      char.locationId === "library" && char.traits.joker > 70 && Math.random() < 0.2,
     probability: 0.2,
     effect: (char) => {
       char.traits.joker = Math.min(100, char.traits.joker + 3);
@@ -474,7 +474,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Caught by Teacher",
     description: "Get in trouble at school",
     condition: (char) => 
-      char.location === "school" && char.traits.reckless > 60 && Math.random() < 0.1,
+      char.locationId === "school" && char.traits.reckless > 60 && Math.random() < 0.1,
     probability: 0.1,
     effect: (char) => {
       char.mood = "stressed";
@@ -490,9 +490,9 @@ export const SCENARIOS: Scenario[] = [
     description: "See your crush at school",
     condition: (char, _world, allChars) => {
       const crush = allChars.find(c => 
-        c.id !== char.id && c.location === "school" && char.likes.includes(c.id)
+        c.id !== char.id && c.locationId === "school" && char.likes.includes(c.id)
       );
-      return char.location === "school" && !!crush && char.traits.flirty > 60 && Math.random() < 0.2;
+      return char.locationId === "school" && !!crush && char.traits.flirty > 60 && Math.random() < 0.2;
     },
     probability: 0.2,
     effect: (char) => {
@@ -506,7 +506,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Lucky Win",
     description: "Win big at the casino",
     condition: (char) => 
-      char.location === "casino" && char.traits.competitive > 70 && Math.random() < 0.1,
+      char.locationId === "casino" && char.traits.competitive > 70 && Math.random() < 0.1,
     probability: 0.1,
     effect: (char) => {
       char.mood = "happy";
@@ -521,7 +521,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Big Risk",
     description: "Reckless character makes risky bets",
     condition: (char) => 
-      char.location === "casino" && char.traits.reckless > 70 && Math.random() < 0.2,
+      char.locationId === "casino" && char.traits.reckless > 70 && Math.random() < 0.2,
     probability: 0.2,
     effect: (char) => {
       char.traits.reckless = Math.min(100, char.traits.reckless + 5);
@@ -535,7 +535,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Recovery Time",
     description: "Character gets healing energy",
     condition: (char) => 
-      char.location === "hospital" && char.energy < 50 && Math.random() < 0.15,
+      char.locationId === "hospital" && char.energy < 50 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.energy = Math.min(100, char.energy + 25);
@@ -548,7 +548,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Worried About Health",
     description: "Character worries in hospital",
     condition: (char) => 
-      char.location === "hospital" && char.traits.anxious > 60 && Math.random() < 0.2,
+      char.locationId === "hospital" && char.traits.anxious > 60 && Math.random() < 0.2,
     probability: 0.2,
     effect: (char) => {
       char.traits.anxious = Math.min(100, char.traits.anxious + 8);
@@ -561,7 +561,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Emotional Scene",
     description: "Moved by movie scene",
     condition: (char) => 
-      char.location === "movieTheater" && char.traits.emotional > 70 && Math.random() < 0.15,
+      char.locationId === "movieTheater" && char.traits.emotional > 70 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.mood = "happy";
@@ -574,7 +574,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Scary Scene",
     description: "Get scared by horror movie",
     condition: (char) => 
-      char.location === "movieTheater" && char.traits.anxious > 50 && Math.random() < 0.15,
+      char.locationId === "movieTheater" && char.traits.anxious > 50 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.mood = "scared";
@@ -588,7 +588,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Train Delay",
     description: "Train is delayed, frustrating",
     condition: (char) => 
-      char.location === "train" && char.traits.irritable > 60 && Math.random() < 0.15,
+      char.locationId === "train" && char.traits.irritable > 60 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.mood = "angry";
@@ -603,9 +603,9 @@ export const SCENARIOS: Scenario[] = [
     description: "Too many people on train",
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
-        c.id !== char.id && c.location === "train"
+        c.id !== char.id && c.locationId === "train"
       ).length;
-      return char.location === "train" && nearby > 3 && char.traits.anxious > 50 && Math.random() < 0.2;
+      return char.locationId === "train" && nearby > 3 && char.traits.anxious > 50 && Math.random() < 0.2;
     },
     probability: 0.2,
     effect: (char) => {
@@ -620,9 +620,9 @@ export const SCENARIOS: Scenario[] = [
     description: "Apartment feels empty",
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
-        c.id !== char.id && c.location === "apartment"
+        c.id !== char.id && c.locationId === "apartment"
       ).length;
-      return char.location === "apartment" && nearby === 0 && char.traits.introverted < 40 && Math.random() < 0.15;
+      return char.locationId === "apartment" && nearby === 0 && char.traits.introverted < 40 && Math.random() < 0.15;
     },
     probability: 0.15,
     effect: (char) => {
@@ -636,7 +636,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Work Stress",
     description: "Workload piles up",
     condition: (char) => 
-      char.location === "office" && char.energy < 40 && char.traits.focused > 50 && Math.random() < 0.15,
+      char.locationId === "office" && char.energy < 40 && char.traits.focused > 50 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.mood = "stressed";
@@ -651,7 +651,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Personal Best",
     description: "Reach fitness goal",
     condition: (char) => 
-      char.location === "gym" && char.traits.ambitious > 70 && char.energy > 60 && Math.random() < 0.15,
+      char.locationId === "gym" && char.traits.ambitious > 70 && char.energy > 60 && Math.random() < 0.15,
     probability: 0.15,
     effect: (char) => {
       char.traits.confident = Math.min(100, char.traits.confident + 8);
@@ -666,7 +666,7 @@ export const SCENARIOS: Scenario[] = [
     name: "One Too Many",
     description: "Character gets a bit tipsy",
     condition: (char) => 
-      char.location === "bar" && char.energy < 30 && char.traits.carefree > 60 && Math.random() < 0.1,
+      char.locationId === "bar" && char.energy < 30 && char.traits.carefree > 60 && Math.random() < 0.1,
     probability: 0.1,
     effect: (char) => {
       char.traits.sociable = Math.min(100, char.traits.sociable + 10);
@@ -682,7 +682,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Intimidated",
     description: "Character feels nervous at police station",
     condition: (char) => 
-      char.location === "policeStation" && char.traits.confident < 50 && Math.random() < 0.2,
+      char.locationId === "policeStation" && char.traits.confident < 50 && Math.random() < 0.2,
     probability: 0.2,
     effect: (char) => {
       char.mood = "stressed";
@@ -701,11 +701,11 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === "park" && 
+        c.locationId === "park" && 
         Math.hypot(c.x - char.x, c.y - char.y) < 80 &&
         c.traits.charming > 50
       );
-      return char.location === "park" && nearby.length > 0 && char.traits.charming > 50 && Math.random() < 0.05;
+      return char.locationId === "park" && nearby.length > 0 && char.traits.charming > 50 && Math.random() < 0.05;
     },
     probability: 0.08,
     effect: (char) => {
@@ -721,7 +721,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Deadline Panic",
     description: "Ambitious character rushes to finish work",
     condition: (char, world) => 
-      char.location === "office" && 
+      char.locationId === "office" && 
       char.traits.ambitious > 65 && 
       world.timeOfDay === "evening" &&
       Math.random() < 0.1,
@@ -740,7 +740,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Coffee Break",
     description: "Character gets energized at the water cooler",
     condition: (char) =>
-      char.location === "office" &&
+      char.locationId === "office" &&
       char.energy < 40 &&
       Math.random() < 0.08,
     probability: 0.1,
@@ -757,7 +757,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Friendly Drunk",
     description: "Joker gets tipsy and sociable",
     condition: (char) =>
-      char.location === "bar" &&
+      char.locationId === "bar" &&
       char.traits.joker > 60 &&
       char.traits.sociable > 60 &&
       Math.random() < 0.07,
@@ -776,7 +776,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Sunburned",
     description: "Clumsy person gets sunburned",
     condition: (char) =>
-      char.location === "beach" &&
+      char.locationId === "beach" &&
       char.traits.clumsy > 65 &&
       Math.random() < 0.08,
     probability: 0.1,
@@ -792,7 +792,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Swimming Fun",
     description: "Energetic people enjoy the water",
     condition: (char) =>
-      char.location === "beach" &&
+      char.locationId === "beach" &&
       char.traits.energetic > 70 &&
       Math.random() < 0.09,
     probability: 0.12,
@@ -809,7 +809,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Big Win",
     description: "Lucky ambitious player celebrates",
     condition: (char) =>
-      char.location === "casino" &&
+      char.locationId === "casino" &&
       char.traits.ambitious > 60 &&
       Math.random() < 0.06,
     probability: 0.08,
@@ -826,7 +826,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Lose Big",
     description: "Devastated loss at casino",
     condition: (char) =>
-      char.location === "casino" &&
+      char.locationId === "casino" &&
       char.traits.ambitious > 50 &&
       Math.random() < 0.05,
     probability: 0.08,
@@ -844,7 +844,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Deep Study",
     description: "Focused person concentrates intensely",
     condition: (char) =>
-      char.location === "library" &&
+      char.locationId === "library" &&
       char.traits.focused > 70 &&
       Math.random() < 0.07,
     probability: 0.1,
@@ -860,7 +860,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Talk Too Loud",
     description: "Clumsy social person disrupts library",
     condition: (char) =>
-      char.location === "library" &&
+      char.locationId === "library" &&
       char.traits.clumsy > 50 &&
       char.traits.sociable > 60 &&
       Math.random() < 0.06,
@@ -879,7 +879,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Pass Test",
     description: "Ambitious student passes exam",
     condition: (char, world) =>
-      char.location === "school" &&
+      char.locationId === "school" &&
       char.traits.ambitious > 65 &&
       world.timeOfDay === "afternoon" &&
       Math.random() < 0.08,
@@ -897,7 +897,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Hospital Recovery",
     description: "Injured person heals slowly",
     condition: (char) =>
-      char.location === "hospital" &&
+      char.locationId === "hospital" &&
       char.energy < 50 &&
       Math.random() < 0.08,
     probability: 0.1,
@@ -914,7 +914,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Police Interrogation",
     description: "Nervous character panics under questioning",
     condition: (char) =>
-      char.location === "policeStation" &&
+      char.locationId === "policeStation" &&
       char.traits.anxious > 60 &&
       Math.random() < 0.07,
     probability: 0.12,
@@ -932,7 +932,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Fancy Dinner",
     description: "Charming person enjoys romantic dinner",
     condition: (char) =>
-      char.location === "restaurant" &&
+      char.locationId === "restaurant" &&
       char.traits.charming > 65 &&
       Math.random() < 0.06,
     probability: 0.08,
@@ -949,7 +949,7 @@ export const SCENARIOS: Scenario[] = [
     name: "Relaxing Nap",
     description: "Tired person takes restorative nap",
     condition: (char) =>
-      char.location === "home" &&
+      char.locationId === "home" &&
       char.energy < 30 &&
       Math.random() < 0.1,
     probability: 0.12,
@@ -968,10 +968,10 @@ export const SCENARIOS: Scenario[] = [
     condition: (char, _world, allChars) => {
       const nearby = allChars.filter(c => 
         c.id !== char.id && 
-        c.location === "gym" && 
+        c.locationId === "gym" && 
         Math.hypot(c.x - char.x, c.y - char.y) < 100
       );
-      return char.location === "gym" && char.traits.competitive > 70 && nearby.length > 0 && Math.random() < 0.07;
+      return char.locationId === "gym" && char.traits.competitive > 70 && nearby.length > 0 && Math.random() < 0.07;
     },
     probability: 0.1,
     effect: (char) => {
