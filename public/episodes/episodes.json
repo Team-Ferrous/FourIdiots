@@ -1,0 +1,33 @@
+[
+  {
+    "id": "coffee-problem",
+    "title": "The Coffee Problem",
+    "cast": ["bob", "alice"],
+    "nextEpisodeDelayMs": 5000,
+    "steps": [
+      { "action": "goto", "character": "bob", "location": "restaurant" },
+      { "action": "goto", "character": "alice", "location": "restaurant" },
+      { "action": "say", "character": "bob", "text": "You took my coffee." },
+      { "action": "say", "character": "alice", "text": "I absolutely did not." },
+      { "action": "wait", "ms": 800 },
+      { "action": "say", "character": "bob", "text": "It has my name on it." },
+      { "action": "say", "character": "alice", "text": "Then someone has your name." },
+      { "action": "end" }
+    ]
+  },
+  {
+    "id": "gym-visit",
+    "title": "A Brief Visit to the Gym",
+    "cast": ["jim", "sarah"],
+    "nextEpisodeDelayMs": 5000,
+    "steps": [
+      { "action": "goto", "character": "sarah", "location": "gym" },
+      { "action": "say", "character": "jim", "text": "You actually came." },
+      { "action": "say", "character": "sarah", "text": "Don't make this a whole thing." },
+      { "action": "wait", "ms": 1000 },
+      { "action": "say", "character": "jim", "text": "I wasn't going to." },
+      { "action": "say", "character": "sarah", "text": "You already did." },
+      { "action": "end" }
+    ]
+  }
+]

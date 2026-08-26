@@ -5,7 +5,9 @@ import { renderWorld } from "./Renderer";
 import { mountCharacterCreator } from "./CharacterCreator";
 import type { LocationId } from "./Location";
 import { getAllLocations, getLocation } from "./Location";
-import { clearChatLog, getChatLog } from "./ChatLog";
+import { clearChatLog, getChatLog, addSystemLine } from "./ChatLog";
+import { loadEpisodes, runEpisodeLoop, stopEpisodeLoop } from "./EpisodeRunner";
+import type { EpisodeDefinition } from "./EpisodeRunner";
 import {
     getCharacters,
     loadWorld,
@@ -22,6 +24,8 @@ app.innerHTML = `
         <div class="world-bar">
             <button id="open-creator" type="button">Create a Citizen</button>
             <button id="save-world" type="button">Save World</button>
+            <button id="episode-toggle" type="button">Start Episodes</button>
+            <span id="episode-status">Episodes stopped</span>
             <div id="location-selector"></div>
         </div>
 
@@ -55,6 +59,10 @@ const rosterList = document.querySelector<HTMLDivElement>("#roster-list")!;
 const rosterCount = document.querySelector<HTMLSpanElement>("#roster-count")!;
 const locationSelector = document.querySelector<HTMLDivElement>("#location-selector")!;
 const chatLog = document.querySelector<HTMLDivElement>("#chat-log")!;
+const episodeToggle = document.querySelector<HTMLButtonElement>("#episode-toggle")!;
+const episodeStatus = document.querySelector<HTMLSpanElement>("#episode-status")!;
+let episodes: EpisodeDefinition[] = [];
+let episodeLoopStarted = false;
 
 function setCurrentLocation(locationId: LocationId) {
     currentLocation = locationId;
@@ -111,6 +119,44 @@ document
         saveWorld();
     });
 
+
+
+episodeToggle.addEventListener("click", () => {
+    if (episodeLoopStarted) {
+        stopEpisodeLoop();
+        episodeLoopStarted = false;
+        episodeToggle.textContent = "Start Episodes";
+        episodeStatus.textContent = "Episodes stopped";
+        return;
+    }
+
+    if (episodes.length === 0) {
+        addSystemLine("No episodes loaded.");
+        return;
+    }
+
+    episodeLoopStarted = true;
+    episodeToggle.textContent = "Stop Episodes";
+
+    void runEpisodeLoop(episodes, {
+        onLocationChange: setCurrentLocation,
+        onEpisodeChange: episode => {
+            episodeStatus.textContent = episode
+                ? `Now playing: ${episode.title}`
+                : "Episodes stopped";
+            if (!episode) {
+                episodeLoopStarted = false;
+                episodeToggle.textContent = "Start Episodes";
+            }
+        }
+    }).catch(error => {
+        console.error(error);
+        addSystemLine(`Episode error: ${String(error)}`);
+        episodeLoopStarted = false;
+        episodeToggle.textContent = "Start Episodes";
+        episodeStatus.textContent = "Episode error";
+    });
+});
 
 document
     .querySelector<HTMLButtonElement>("#clear-chat")!
@@ -244,6 +290,16 @@ function gameLoop(currentTime: number) {
 
 async function start() {
     await loadWorld();
+
+    try {
+        episodes = await loadEpisodes();
+        episodeStatus.textContent = `${episodes.length} episodes loaded`;
+    } catch (error) {
+        console.error(error);
+        addSystemLine(`Could not load episodes: ${String(error)}`);
+        episodeStatus.textContent = "Episode load failed";
+    }
+
     refreshRoster();
     refreshChatLog();
     previousTime = performance.now();

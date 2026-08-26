@@ -33,3 +33,16 @@ The personality/scenario/train experiments remain available but are not being al
 ## Chat log
 
 `ChatLog.ts` owns a small session history of the last 100 spoken lines. The simulation writes travel announcements and conversation speech into it. `main.ts` renders the log directly beneath the world view and automatically scrolls to the newest entry. The log is intentionally session-only for now; world persistence remains focused on citizen state.
+
+## Episode DSL / functional episode loop
+
+`public/episodes/episodes.json` is now the deliberately tiny episode DSL. It is a JSON array of episodes. Each episode can use only four commands:
+
+- `goto`: move a named character to a location, optionally overriding their travel announcement.
+- `say`: show a speech bubble and write the line to the chat log.
+- `wait`: pause the script for a number of milliseconds.
+- `end`: finish the episode and save the world.
+
+`EpisodeRunner.ts` validates the JSON before executing it. Character references use the IDs from `public/characters.json`; location references must be valid `LocationId`s. While an episode is running, autonomous simulation is paused so random wandering/conversations cannot fight the script. The runner loops the episode array forever until Stop Episodes is pressed. The camera follows scripted `goto`/`say` actions.
+
+This intentionally keeps the API boundary tiny: a future story generator only needs to produce valid episode JSON. It does not need access to renderer or simulation internals.

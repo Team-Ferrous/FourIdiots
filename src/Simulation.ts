@@ -5,6 +5,7 @@ import type { WorldState as ScenarioWorldState } from "./Scenarios";
 
 import { getLocation } from "./Location";
 import { addChatLine } from "./ChatLog";
+import { isEpisodeRunning } from "./EpisodeRunner";
 import { initializeTraits } from "./Personality";
 import {
     addCharacter,
@@ -71,6 +72,9 @@ export function updateSimulation(
     timestamp: number
 ) {
     worldState.timeOfDay = getTimeOfDay(timestamp);
+
+    // A scripted episode owns character actions while it is running.
+    if (isEpisodeRunning()) return;
 
     const characters = getCharacters();
 
